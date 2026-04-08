@@ -111,7 +111,13 @@ async function handleDelete(item: Inscricao) {
           {{ caoMap.get(item.microchip_cao) || item.microchip_cao }}
         </template>
         <template #item.status="{ item }">
-          <v-chip size="small">{{ item.status || '—' }}</v-chip>
+          <v-chip
+            size="small"
+            :color="item.status === 'pendente' ? 'warning' : item.status === 'finalizado' ? 'success' : item.status === 'desclassificado' ? 'error' : 'default'"
+            variant="tonal"
+          >
+            {{ item.status || '—' }}
+          </v-chip>
         </template>
         <template #item.actions="{ item }">
           <v-btn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'inscricoes-edit', params: { id: item.id_inscricao } }" />

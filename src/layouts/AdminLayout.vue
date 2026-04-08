@@ -5,6 +5,7 @@ const drawer = ref(true)
 
 const operacaoItems = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/' },
+  { title: 'Preparar Competição', icon: 'mdi-clipboard-flow-outline', to: '/preparacao' },
   { title: 'Operar Prova', icon: 'mdi-play-circle-outline', to: '/prova-ativa' },
 ]
 

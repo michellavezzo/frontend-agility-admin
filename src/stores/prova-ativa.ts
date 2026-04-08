@@ -77,7 +77,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
                 interpolatedTia.value = estado.value.tia_decorrido + elapsed
                 interpolatedTop.value = estado.value.top_decorrido
             } else if (est === 'rodando') {
-                interpolatedTia.value = estado.value.tia_decorrido + elapsed
+                interpolatedTia.value = estado.value.tia_decorrido
                 interpolatedTop.value = estado.value.top_decorrido + elapsed
             } else {
                 interpolatedTia.value = estado.value.tia_decorrido

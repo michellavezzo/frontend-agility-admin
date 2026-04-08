@@ -117,6 +117,7 @@ async function handleConfirmar() {
     if (!ok) return
     const result = await store.confirmar()
     if (result) {
+        inscricaoSelecionada.value = null
         notification.notify(
             `Resultado confirmado — TOP: ${store.formatTime(result.top)} | TIA: ${store.formatTime(result.tia)}`,
         )
@@ -135,6 +136,7 @@ async function handleReset() {
     if (store.lastError) {
         notification.notify(store.lastError, 'error')
     } else {
+        inscricaoSelecionada.value = null
         notification.notify('Cronômetro resetado', 'info')
     }
 }

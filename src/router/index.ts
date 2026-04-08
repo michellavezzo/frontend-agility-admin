@@ -9,6 +9,13 @@ const router = createRouter({
             component: () => import('@/views/DashboardView.vue'),
         },
 
+        // ── Preparação ──
+        {
+            path: '/preparacao',
+            name: 'preparacao',
+            component: () => import('@/views/preparacao/PreparacaoView.vue'),
+        },
+
         // ── Prova Ativa (Operação) ──
         {
             path: '/prova-ativa',
