@@ -6,7 +6,7 @@ const notification = useNotificationStore()
 </script>
 
 <template>
-  <AdminLayout class="p-4"/>
+  <AdminLayout />
 
   <v-snackbar
     v-model="notification.show"

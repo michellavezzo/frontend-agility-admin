@@ -6,6 +6,11 @@ import { useCompetidoresStore } from '@/stores/competidores'
 import { useCaesStore } from '@/stores/caes'
 import { useNotificationStore } from '@/stores/notification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsChip from '@/components/ui/DsChip.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
 import type { Inscricao } from '@/types'
 
 const store = useInscricoesStore()
@@ -14,7 +19,6 @@ const competidores = useCompetidoresStore()
 const caes = useCaesStore()
 const notification = useNotificationStore()
 const confirmDialog = ref<InstanceType<typeof ConfirmDialog>>()
-const search = ref('')
 const statusFilter = ref('')
 
 const headers = [
@@ -70,25 +74,13 @@ async function handleDelete(item: Inscricao) {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Inscrições</h1>
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'inscricoes-create' }">Nova</v-btn>
-    </div>
+    <PageHeader title="Inscrições">
+      <DsBtn color="primary" prepend-icon="mdi-plus" :to="{ name: 'inscricoes-create' }">Nova</DsBtn>
+    </PageHeader>
 
-    <v-card class="table-card" flat>
-      <v-toolbar flat color="transparent" class="px-4 pt-2">
-        <v-text-field
-          v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Buscar"
-          single-line
-          hide-details
-          clearable
-          density="compact"
-          class="mr-4"
-          style="max-width: 320px;"
-        />
-        <v-text-field
+    <DataTable :headers="headers" :items="store.items" :loading="store.loading" no-data-text="Nenhuma inscrição cadastrada">
+      <template #toolbar>
+        <DsTextField
           v-model="statusFilter"
           label="Filtrar por status"
           clearable
@@ -98,36 +90,29 @@ async function handleDelete(item: Inscricao) {
           @keyup.enter="applyFilter"
           @click:clear="statusFilter = ''; applyFilter()"
         />
-        <v-btn variant="text" class="ml-2" @click="applyFilter">Filtrar</v-btn>
-      </v-toolbar>
-      <v-data-table :headers="headers" :items="store.items" :loading="store.loading" :search="search" hover>
-        <template #item.id_prova="{ item }">
-          {{ provaMap.get(item.id_prova) || item.id_prova }}
-        </template>
-        <template #item.id_competidor="{ item }">
-          {{ competidorMap.get(item.id_competidor) || item.id_competidor }}
-        </template>
-        <template #item.microchip_cao="{ item }">
-          {{ caoMap.get(item.microchip_cao) || item.microchip_cao }}
-        </template>
-        <template #item.status="{ item }">
-          <v-chip
-            size="small"
-            :color="item.status === 'pendente' ? 'warning' : item.status === 'finalizado' ? 'success' : item.status === 'desclassificado' ? 'error' : 'default'"
-            variant="tonal"
-          >
-            {{ item.status || '—' }}
-          </v-chip>
+        <DsBtn variant="text" class="ml-2" @click="applyFilter">Filtrar</DsBtn>
+      </template>
+      <template #item.id_prova="{ item }">
+        {{ provaMap.get(item.id_prova) || item.id_prova }}
+      </template>
+      <template #item.id_competidor="{ item }">
+        {{ competidorMap.get(item.id_competidor) || item.id_competidor }}
+      </template>
+      <template #item.microchip_cao="{ item }">
+        {{ caoMap.get(item.microchip_cao) || item.microchip_cao }}
+      </template>
+      <template #item.status="{ item }">
+        <DsChip
+          :color="item.status === 'pendente' ? 'warning' : item.status === 'finalizado' ? 'success' : item.status === 'desclassificado' ? 'error' : 'default'"
+        >
+          {{ item.status || '—' }}
+        </DsChip>
         </template>
         <template #item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'inscricoes-edit', params: { id: item.id_inscricao } }" />
-          <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
+          <DsBtn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'inscricoes-edit', params: { id: item.id_inscricao } }" />
+          <DsBtn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
         </template>
-        <template #no-data>
-          <div class="text-center pa-6 text-medium-emphasis">Nenhuma inscrição cadastrada</div>
-        </template>
-      </v-data-table>
-    </v-card>
+    </DataTable>
 
     <ConfirmDialog ref="confirmDialog" />
   </div>

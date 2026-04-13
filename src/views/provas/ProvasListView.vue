@@ -4,6 +4,9 @@ import { useProvasStore } from '@/stores/provas'
 import { useCompeticoesStore } from '@/stores/competicoes'
 import { useNotificationStore } from '@/stores/notification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
 import type { Prova } from '@/types'
 
 const store = useProvasStore()
@@ -29,8 +32,6 @@ const competicaoMap = computed(() => {
   return map
 })
 
-const search = ref('')
-
 onMounted(() => {
   store.fetchAll()
   competicoes.fetchAll()
@@ -50,38 +51,19 @@ async function handleDelete(item: Prova) {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Provas</h1>
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'provas-create' }">Nova</v-btn>
-    </div>
+    <PageHeader title="Provas">
+      <DsBtn color="primary" prepend-icon="mdi-plus" :to="{ name: 'provas-create' }">Nova</DsBtn>
+    </PageHeader>
 
-    <v-card class="table-card" flat>
-      <v-toolbar flat color="transparent" class="px-4 pt-2">
-        <v-text-field
-          v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Buscar"
-          single-line
-          hide-details
-          clearable
-          density="compact"
-          class="mr-4"
-          style="max-width: 320px;"
-        />
-      </v-toolbar>
-      <v-data-table :headers="headers" :items="store.items" :loading="store.loading" :search="search" hover>
-        <template #item.id_competicao="{ item }">
-          {{ competicaoMap.get(item.id_competicao) || item.id_competicao }}
-        </template>
-        <template #item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'provas-edit', params: { id: item.id_prova } }" />
-          <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
-        </template>
-        <template #no-data>
-          <div class="text-center pa-6 text-medium-emphasis">Nenhuma prova cadastrada</div>
-        </template>
-      </v-data-table>
-    </v-card>
+    <DataTable :headers="headers" :items="store.items" :loading="store.loading" no-data-text="Nenhuma prova cadastrada">
+      <template #item.id_competicao="{ item }">
+        {{ competicaoMap.get(item.id_competicao) || item.id_competicao }}
+      </template>
+      <template #item.actions="{ item }">
+        <DsBtn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'provas-edit', params: { id: item.id_prova } }" />
+        <DsBtn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
+      </template>
+    </DataTable>
 
     <ConfirmDialog ref="confirmDialog" />
   </div>

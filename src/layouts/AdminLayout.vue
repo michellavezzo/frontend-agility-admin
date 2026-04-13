@@ -31,14 +31,14 @@ const sistemaItems = [
 
 <template>
   <v-app>
-    <v-app-bar color="primary" density="comfortable" elevation="0" border="b">
+    <v-app-bar flat density="comfortable" class="app-bar-bmw" elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-app-bar-title class="font-weight-bold">
-        <v-icon icon="mdi-dog" class="mr-1" /> Agility Admin
+      <v-app-bar-title class="app-bar-title">
+        AGILITY ADMIN
       </v-app-bar-title>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" :width="250" border="r">
+    <v-navigation-drawer v-model="drawer" :width="250" class="nav-drawer-bmw">
       <v-list nav density="compact" class="px-2 pt-3">
         <v-list-item
           v-for="item in operacaoItems"
@@ -47,8 +47,7 @@ const sistemaItems = [
           :prepend-icon="item.icon"
           :title="item.title"
           color="primary"
-          rounded="lg"
-          class="mb-1"
+          class="mb-1 nav-item"
         />
       </v-list>
 
@@ -61,8 +60,7 @@ const sistemaItems = [
           :prepend-icon="item.icon"
           :title="item.title"
           color="primary"
-          rounded="lg"
-          class="mb-1"
+          class="mb-1 nav-item"
         />
       </v-list>
 
@@ -75,8 +73,7 @@ const sistemaItems = [
           :prepend-icon="item.icon"
           :title="item.title"
           color="primary"
-          rounded="lg"
-          class="mb-1"
+          class="mb-1 nav-item"
         />
       </v-list>
 
@@ -89,16 +86,48 @@ const sistemaItems = [
           :prepend-icon="item.icon"
           :title="item.title"
           color="primary"
-          rounded="lg"
-          class="mb-1"
+          class="mb-1 nav-item"
         />
       </v-list>
     </v-navigation-drawer>
 
     <v-main>
-      <v-container fluid class="pa-6" style="max-width: 1400px;">
+      <v-container fluid class="main-content">
         <router-view />
       </v-container>
     </v-main>
   </v-app>
 </template>
+
+<style scoped>
+.app-bar-bmw {
+    background-color: var(--ds-black) !important;
+    color: var(--ds-white) !important;
+    border-bottom: 2px solid var(--ds-blue) !important;
+}
+
+.app-bar-title {
+    font-weight: 900 !important;
+    font-size: 1.125rem !important;
+    letter-spacing: 0.08em !important;
+    line-height: var(--ds-line-height-heading) !important;
+}
+
+.nav-drawer-bmw {
+    border-right: 1px solid var(--ds-border) !important;
+}
+
+.nav-item {
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: var(--ds-line-height-tight);
+}
+
+.nav-item:deep(.v-list-item-title) {
+    font-weight: 400 !important;
+}
+
+.nav-item.v-list-item--active:deep(.v-list-item-title) {
+    font-weight: 700 !important;
+}
+</style>

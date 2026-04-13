@@ -5,6 +5,11 @@ import { useResultadosStore } from '@/stores/resultados'
 import { useInscricoesStore } from '@/stores/inscricoes'
 import { useNotificationStore } from '@/stores/notification'
 import { resultadosApi } from '@/api/resultados'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,10 +19,9 @@ const notification = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
-const form = ref()
 
 const formData = ref({
-  id_inscricao: 0,
+  id_inscricao: null as number | null,
   total_pontos_t: undefined as number | undefined,
   total_pontos_tp: undefined as number | undefined,
   posicao: undefined as number | undefined,
@@ -50,16 +54,14 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
+    const payload = { ...formData.value, id_inscricao: formData.value.id_inscricao! }
     if (isEdit.value) {
-      await store.update(Number(route.params.id), formData.value)
+      await store.update(Number(route.params.id), payload)
       notification.notify('Resultado atualizado com sucesso')
     } else {
-      await store.create(formData.value)
+      await store.create(payload)
       notification.notify('Resultado criado com sucesso')
     }
     router.push({ name: 'resultados' })
@@ -73,16 +75,14 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Novo' }} Resultado</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Novo'} Resultado`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
-    <v-card class="form-card" flat>
-      <v-form ref="form" @submit.prevent="save">
+    <FormCard :saving="saving" @submit="save" @cancel="router.back()">
         <v-row>
           <v-col cols="12" md="6">
-            <v-select
+            <DsSelect
               v-model="formData.id_inscricao"
               :items="inscricaoOptions"
               label="Inscrição"
@@ -90,21 +90,16 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model.number="formData.posicao" label="Posição" type="number" />
+            <DsTextField v-model="formData.posicao" label="Posição" type="number" />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model.number="formData.total_pontos_t" label="Total Pontos T" type="number" step="0.01" />
+            <DsTextField v-model="formData.total_pontos_t" label="Total Pontos T" type="number" step="0.01" />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model.number="formData.total_pontos_tp" label="Total Pontos TP" type="number" step="0.01" />
+            <DsTextField v-model="formData.total_pontos_tp" label="Total Pontos TP" type="number" step="0.01" />
           </v-col>
         </v-row>
 
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving">Salvar</v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    </FormCard>
   </div>
 </template>

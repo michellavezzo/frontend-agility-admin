@@ -3,6 +3,10 @@ import { onMounted, ref } from 'vue'
 import { useCronometragensStore } from '@/stores/cronometragens'
 import { useNotificationStore } from '@/stores/notification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsChip from '@/components/ui/DsChip.vue'
 import type { Cronometragem } from '@/types'
 
 const store = useCronometragensStore()
@@ -20,8 +24,6 @@ const headers = [
   { title: 'Ações', key: 'actions', sortable: false, width: '120px' },
 ]
 
-const search = ref('')
-
 onMounted(() => store.fetchAll())
 
 async function handleDelete(item: Cronometragem) {
@@ -38,47 +40,28 @@ async function handleDelete(item: Cronometragem) {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Cronometragens</h1>
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'cronometragens-create' }">Nova</v-btn>
-    </div>
+    <PageHeader title="Cronometragens">
+      <DsBtn color="primary" prepend-icon="mdi-plus" :to="{ name: 'cronometragens-create' }">Nova</DsBtn>
+    </PageHeader>
 
-    <v-card class="table-card" flat>
-      <v-toolbar flat color="transparent" class="px-4 pt-2">
-        <v-text-field
-          v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Buscar"
-          single-line
-          hide-details
-          clearable
-          density="compact"
-          class="mr-4"
-          style="max-width: 320px;"
-        />
-      </v-toolbar>
-      <v-data-table :headers="headers" :items="store.items" :loading="store.loading" :search="search" hover>
-        <template #item.tempo_inicial="{ item }">
-          {{ item.tempo_inicial != null ? `${item.tempo_inicial}s` : '—' }}
-        </template>
-        <template #item.tempo_final="{ item }">
-          {{ item.tempo_final != null ? `${item.tempo_final}s` : '—' }}
-        </template>
-        <template #item.tempo_oficial="{ item }">
-          {{ item.tempo_oficial != null ? `${item.tempo_oficial}s` : '—' }}
-        </template>
-        <template #item.status="{ item }">
-          <v-chip size="small">{{ item.status }}</v-chip>
-        </template>
-        <template #item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'cronometragens-edit', params: { id: item.id_cronometro } }" />
-          <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
-        </template>
-        <template #no-data>
-          <div class="text-center pa-6 text-medium-emphasis">Nenhuma cronometragem cadastrada</div>
-        </template>
-      </v-data-table>
-    </v-card>
+    <DataTable :headers="headers" :items="store.items" :loading="store.loading" no-data-text="Nenhuma cronometragem cadastrada">
+      <template #item.tempo_inicial="{ item }">
+        {{ item.tempo_inicial != null ? `${item.tempo_inicial}s` : '—' }}
+      </template>
+      <template #item.tempo_final="{ item }">
+        {{ item.tempo_final != null ? `${item.tempo_final}s` : '—' }}
+      </template>
+      <template #item.tempo_oficial="{ item }">
+        {{ item.tempo_oficial != null ? `${item.tempo_oficial}s` : '—' }}
+      </template>
+      <template #item.status="{ item }">
+        <DsChip>{{ item.status }}</DsChip>
+      </template>
+      <template #item.actions="{ item }">
+        <DsBtn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'cronometragens-edit', params: { id: item.id_cronometro } }" />
+        <DsBtn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
+      </template>
+    </DataTable>
 
     <ConfirmDialog ref="confirmDialog" />
   </div>

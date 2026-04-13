@@ -7,6 +7,9 @@ import { useCompetidoresStore } from '@/stores/competidores'
 import { useCaesStore } from '@/stores/caes'
 import { useProvasStore } from '@/stores/provas'
 import { useInscricoesStore } from '@/stores/inscricoes'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsChip from '@/components/ui/DsChip.vue'
 
 const users = useUsersStore()
 const competicoes = useCompeticoesStore()
@@ -170,9 +173,8 @@ const inscricoesPendentes = computed(() =>
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Preparação da Competição</h1>
-      <v-chip
+    <PageHeader title="Preparação da Competição">
+      <DsChip
         v-if="!loading"
         :color="prontoParaOperar ? 'success' : 'warning'"
         variant="elevated"
@@ -180,8 +182,8 @@ const inscricoesPendentes = computed(() =>
         class="font-weight-bold text-white"
       >
         {{ prontoParaOperar ? 'Pronto para operar' : `${etapasCompletas} de ${etapas.length} etapas` }}
-      </v-chip>
-    </div>
+      </DsChip>
+    </PageHeader>
 
     <!-- Resumo rápido -->
     <v-alert
@@ -191,7 +193,7 @@ const inscricoesPendentes = computed(() =>
       density="compact"
       class="mb-5"
       icon="mdi-check-circle"
-      rounded="lg"
+      rounded="0"
     >
       Todas as etapas de preparação foram concluídas.
       <strong>{{ inscricoesPendentes }}</strong> inscrição(ões) pendente(s) aguardando na
@@ -205,7 +207,7 @@ const inscricoesPendentes = computed(() =>
       density="compact"
       class="mb-5"
       icon="mdi-information"
-      rounded="lg"
+      rounded="0"
     >
       Siga as etapas abaixo para preparar a base de dados da competição.
       Cada etapa depende das anteriores — comece pelo responsável e avance até as inscrições.
@@ -217,7 +219,6 @@ const inscricoesPendentes = computed(() =>
       :model-value="(etapasCompletas / etapas.length) * 100"
       :color="prontoParaOperar ? 'success' : 'primary'"
       height="8"
-      rounded
       class="mb-6"
     />
 
@@ -267,13 +268,11 @@ const inscricoesPendentes = computed(() =>
                   <p class="etapa-descricao">{{ etapa.descricao }}</p>
                 </div>
                 <div class="etapa-contagem">
-                  <v-chip
+                  <DsChip
                     :color="etapa.count > 0 ? 'success' : 'default'"
-                    variant="tonal"
-                    size="small"
                   >
                     {{ etapa.count }} cadastrado(s)
-                  </v-chip>
+                  </DsChip>
                 </div>
               </div>
 
@@ -285,7 +284,7 @@ const inscricoesPendentes = computed(() =>
                 density="compact"
                 class="mt-3 mb-0"
                 icon="mdi-lock"
-                rounded="lg"
+                rounded="0"
               >
                 Complete as etapas anteriores antes de prosseguir.
               </v-alert>
@@ -297,14 +296,14 @@ const inscricoesPendentes = computed(() =>
                 density="compact"
                 class="mt-3 mb-0"
                 icon="mdi-lightbulb-outline"
-                rounded="lg"
+                rounded="0"
               >
                 {{ etapa.dica }}
               </v-alert>
 
               <!-- Ações -->
               <div class="etapa-acoes">
-                <v-btn
+                <DsBtn
                   :color="etapa.color"
                   variant="flat"
                   :prepend-icon="etapaStatus(etapa) === 'completa' ? 'mdi-plus' : 'mdi-plus-circle'"
@@ -313,8 +312,8 @@ const inscricoesPendentes = computed(() =>
                   size="small"
                 >
                   {{ etapa.labelBotao }}
-                </v-btn>
-                <v-btn
+                </DsBtn>
+                <DsBtn
                   variant="text"
                   size="small"
                   :to="etapa.rotaLista"
@@ -322,7 +321,7 @@ const inscricoesPendentes = computed(() =>
                   append-icon="mdi-arrow-right"
                 >
                   Ver todos ({{ etapa.count }})
-                </v-btn>
+                </DsBtn>
               </div>
             </div>
           </div>
@@ -342,14 +341,14 @@ const inscricoesPendentes = computed(() =>
       <p class="text-body-2 text-medium-emphasis mb-4">
         {{ inscricoesPendentes }} inscrição(ões) com status "pendente" disponível(is) para a prova ativa.
       </p>
-      <v-btn
+      <DsBtn
         color="success"
         size="large"
         prepend-icon="mdi-play-circle-outline"
         to="/prova-ativa"
       >
         Ir para Operação da Prova
-      </v-btn>
+      </DsBtn>
     </v-card>
   </div>
 </template>
@@ -374,8 +373,8 @@ const inscricoesPendentes = computed(() =>
 .conector-line {
   width: 3px;
   height: 24px;
-  background: #e0e0e0;
-  border-radius: 2px;
+  background: var(--ds-border);
+  border-radius: 0;
 }
 
 .conector-completo {
@@ -383,13 +382,13 @@ const inscricoesPendentes = computed(() =>
 }
 
 .etapa-card {
-  border: 1px solid #e8ecf1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s, border-color 0.2s;
+  border: 1px solid var(--ds-border);
+  box-shadow: none;
+  transition: border-color 0.2s;
 }
 
 .etapa-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--ds-blue);
 }
 
 .etapa-completa {
@@ -417,7 +416,7 @@ const inscricoesPendentes = computed(() =>
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,8 +444,8 @@ const inscricoesPendentes = computed(() =>
 
 .etapa-titulo {
   font-size: 1rem;
-  font-weight: 600;
-  color: #1a2332;
+  font-weight: 700;
+  color: var(--ds-black);
   margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
@@ -454,9 +453,9 @@ const inscricoesPendentes = computed(() =>
 
 .etapa-descricao {
   font-size: 0.85rem;
-  color: #637381;
+  color: var(--ds-gray);
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--ds-line-height-heading);
 }
 
 .etapa-contagem {

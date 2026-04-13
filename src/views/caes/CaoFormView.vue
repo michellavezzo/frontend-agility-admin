@@ -4,6 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCaesStore } from '@/stores/caes'
 import { useNotificationStore } from '@/stores/notification'
 import { caesApi } from '@/api/caes'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,7 +16,6 @@ const notification = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.microchip)
 const saving = ref(false)
-const form = ref()
 
 const formData = ref({
   microchip: '',
@@ -47,9 +50,6 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
     if (isEdit.value) {
@@ -70,46 +70,38 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Novo' }} Cão</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Novo'} Cão`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
-    <v-card class="form-card" flat>
-      <v-form ref="form" @submit.prevent="save">
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="formData.microchip"
-              label="Microchip"
-              :rules="[rules.required]"
-              :disabled="isEdit"
-              :hint="isEdit ? 'Microchip não pode ser alterado' : ''"
-              persistent-hint
-            />
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field v-model="formData.nome" label="Nome" :rules="[rules.required]" />
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field v-model="formData.raca" label="Raça" :rules="[rules.required]" />
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field v-model="formData.cernelha" label="Cernelha (cm)" :rules="[rules.required]" />
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field v-model="formData.categoria_salto" label="Categoria de Salto" :rules="[rules.required]" />
-          </v-col>
-          <v-col cols="12" md="4" class="flex items-center">
-            <v-checkbox v-model="formData.is_cao_branco" label="Cão Branco" hide-details />
-          </v-col>
-        </v-row>
-
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving">Salvar</v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    <FormCard :saving="saving" @submit="save" @cancel="router.back()">
+      <v-row>
+        <v-col cols="12" md="6">
+          <DsTextField
+            v-model="formData.microchip"
+            label="Microchip"
+            :rules="[rules.required]"
+            :disabled="isEdit"
+            :hint="isEdit ? 'Microchip não pode ser alterado' : ''"
+            persistent-hint
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <DsTextField v-model="formData.nome" label="Nome" :rules="[rules.required]" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <DsTextField v-model="formData.raca" label="Raça" :rules="[rules.required]" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <DsTextField v-model="formData.cernelha" label="Cernelha (cm)" :rules="[rules.required]" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <DsTextField v-model="formData.categoria_salto" label="Categoria de Salto" :rules="[rules.required]" />
+        </v-col>
+        <v-col cols="12" md="4" class="flex items-center">
+          <v-checkbox v-model="formData.is_cao_branco" label="Cão Branco" hide-details />
+        </v-col>
+      </v-row>
+    </FormCard>
   </div>
 </template>

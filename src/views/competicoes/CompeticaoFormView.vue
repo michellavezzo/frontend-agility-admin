@@ -5,6 +5,11 @@ import { useCompeticoesStore } from '@/stores/competicoes'
 import { useUsersStore } from '@/stores/users'
 import { useNotificationStore } from '@/stores/notification'
 import { competicoesApi } from '@/api/competicoes'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,13 +19,12 @@ const notification = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
-const form = ref()
 
 const formData = ref({
   nome: '',
   data: '',
   localizacao: '',
-  responsavel_id: 0,
+  responsavel_id: null as number | null,
   nomes_arbitros_convidados: '',
   nome_diretor_evento: '',
   nome_responsavel_secretaria: '',
@@ -58,13 +62,11 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
     const payload = {
       ...formData.value,
+      responsavel_id: formData.value.responsavel_id!,
       nomes_arbitros_convidados: formData.value.nomes_arbitros_convidados || null,
       nome_diretor_evento: formData.value.nome_diretor_evento || null,
       nome_responsavel_secretaria: formData.value.nome_responsavel_secretaria || null,
@@ -88,22 +90,20 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Nova' }} Competição</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Nova'} Competição`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
-    <v-card class="form-card" flat>
-      <v-form ref="form" @submit.prevent="save">
+    <FormCard :saving="saving" @submit="save" @cancel="router.back()">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="formData.nome" label="Nome" :rules="[rules.required]" />
+            <DsTextField v-model="formData.nome" label="Nome" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="formData.data" label="Data" type="date" :rules="[rules.required]" />
+            <DsTextField v-model="formData.data" label="Data" type="date" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-select
+            <DsSelect
               v-model="formData.responsavel_id"
               :items="userOptions"
               label="Responsável"
@@ -111,27 +111,22 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model="formData.localizacao" label="Localização" :rules="[rules.required]" />
+            <DsTextField v-model="formData.localizacao" label="Localização" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model="formData.nomes_arbitros_convidados" label="Árbitros Convidados" />
+            <DsTextField v-model="formData.nomes_arbitros_convidados" label="Árbitros Convidados" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field v-model="formData.nome_diretor_evento" label="Diretor do Evento" />
+            <DsTextField v-model="formData.nome_diretor_evento" label="Diretor do Evento" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field v-model="formData.nome_responsavel_secretaria" label="Responsável Secretaria" />
+            <DsTextField v-model="formData.nome_responsavel_secretaria" label="Responsável Secretaria" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field v-model="formData.nome_veterinario" label="Veterinário" />
+            <DsTextField v-model="formData.nome_veterinario" label="Veterinário" />
           </v-col>
         </v-row>
 
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving">Salvar</v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    </FormCard>
   </div>
 </template>

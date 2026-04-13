@@ -7,6 +7,8 @@ import { useCompetidoresStore } from '@/stores/competidores'
 import { useCaesStore } from '@/stores/caes'
 import { useJuizesStore } from '@/stores/juizes'
 import { useInscricoesStore } from '@/stores/inscricoes'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatCard from '@/components/ui/StatCard.vue'
 
 const users = useUsersStore()
 const competicoes = useCompeticoesStore()
@@ -52,21 +54,18 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Dashboard</h1>
-    </div>
+    <PageHeader title="Dashboard" />
 
-    <!-- Ações rápidas -->
     <v-row class="mb-4">
       <v-col cols="12" sm="6">
-        <v-card to="/preparacao" class="pa-4" flat style="border: 1px solid #e8ecf1; cursor: pointer;">
+        <v-card to="/preparacao" class="pa-4 quick-action" flat>
           <div class="d-flex align-center ga-3">
-            <v-avatar color="primary" size="48">
+            <v-avatar color="primary" size="48" style="border-radius: 0;">
               <v-icon icon="mdi-clipboard-flow" color="white" />
             </v-avatar>
             <div>
               <div class="text-subtitle-1 font-weight-bold">Preparar Competição</div>
-              <div class="text-body-2 text-medium-emphasis">
+              <div class="text-body-2" style="color: var(--ds-gray);">
                 {{ baseCompleta ? 'Base pronta — revisar cadastros' : 'Siga o fluxo de cadastro passo a passo' }}
               </div>
             </div>
@@ -76,14 +75,14 @@ onMounted(() => {
         </v-card>
       </v-col>
       <v-col cols="12" sm="6">
-        <v-card to="/prova-ativa" class="pa-4" flat style="border: 1px solid #e8ecf1; cursor: pointer;">
+        <v-card to="/prova-ativa" class="pa-4 quick-action" flat>
           <div class="d-flex align-center ga-3">
-            <v-avatar :color="inscricoesPendentes > 0 ? 'success' : 'grey'" size="48">
+            <v-avatar :color="inscricoesPendentes > 0 ? 'success' : 'grey'" size="48" style="border-radius: 0;">
               <v-icon icon="mdi-play-circle" color="white" />
             </v-avatar>
             <div>
               <div class="text-subtitle-1 font-weight-bold">Operar Prova</div>
-              <div class="text-body-2 text-medium-emphasis">
+              <div class="text-body-2" style="color: var(--ds-gray);">
                 {{ inscricoesPendentes > 0 ? `${inscricoesPendentes} inscrição(ões) pendente(s)` : 'Nenhuma inscrição pendente' }}
               </div>
             </div>
@@ -95,13 +94,26 @@ onMounted(() => {
     </v-row>
 
     <v-row>
-      <v-col v-for="card in cards" :key="card.title" cols="12" sm="6" md="4" lg="3">
-        <v-card :to="card.to" class="stat-card pa-5 text-center" flat>
-          <v-icon :icon="card.icon" size="40" color="primary" class="mb-3" />
-          <div class="text-h4 font-weight-bold mb-1">{{ card.store.items.length }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ card.title }}</div>
-        </v-card>
+      <v-col v-for="card in cards" :key="card.title" cols="6" sm="4" md="4" lg="3">
+        <StatCard
+          :title="card.title"
+          :value="card.store.items.length"
+          :icon="card.icon"
+          :to="card.to"
+        />
       </v-col>
     </v-row>
   </div>
 </template>
+
+<style scoped>
+.quick-action {
+    border: 1px solid var(--ds-border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.quick-action:hover {
+    border-color: var(--ds-blue);
+}
+</style>

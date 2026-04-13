@@ -3,6 +3,10 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useProvaAtivaStore } from '@/stores/prova-ativa'
 import { useNotificationStore } from '@/stores/notification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsChip from '@/components/ui/DsChip.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
 
 const store = useProvaAtivaStore()
 const notification = useNotificationStore()
@@ -151,15 +155,14 @@ async function handleSimularSensor() {
 
 <template>
     <div>
-        <div class="page-header">
-            <h1>Operar Prova</h1>
-            <v-chip :color="estadoColor" variant="elevated" size="large" class="font-weight-bold text-white">
+        <PageHeader title="Operar Prova">
+            <DsChip :color="estadoColor" variant="elevated" size="large" class="font-weight-bold text-white">
                 {{ estadoLabel }}
-            </v-chip>
-        </div>
+            </DsChip>
+        </PageHeader>
 
         <!-- Aviso de interface exclusiva -->
-        <v-alert type="warning" variant="tonal" density="compact" class="mb-5" icon="mdi-alert-circle" rounded="lg">
+        <v-alert type="warning" variant="tonal" density="compact" class="mb-5" icon="mdi-alert-circle" rounded="0">
             Operação remota via Wi-Fi. Use <strong>apenas uma interface de operação por vez</strong>.
             O fallback local <code>/operador</code> está disponível na Raspberry Pi em caso de falha de
             rede.
@@ -173,7 +176,7 @@ async function handleSimularSensor() {
             density="compact"
             class="mb-5"
             icon="mdi-wifi-off"
-            rounded="lg"
+            rounded="0"
         >
             Sem conexão com o backend. O cronômetro continua rodando no servidor. Tentando reconectar...
         </v-alert>
@@ -205,7 +208,7 @@ async function handleSimularSensor() {
                     <div class="text-overline text-medium-emphasis mb-3">Faltas</div>
                     <div class="text-h3 font-weight-bold mb-3">{{ store.estado.faltas }}</div>
                     <div class="d-flex justify-center ga-3">
-                        <v-btn
+                        <DsBtn
                             icon="mdi-minus"
                             size="small"
                             variant="tonal"
@@ -213,7 +216,7 @@ async function handleSimularSensor() {
                             :disabled="!store.podeDesfazerFalta || store.actionLoading"
                             @click="handleDesfazerFalta"
                         />
-                        <v-btn
+                        <DsBtn
                             icon="mdi-plus"
                             size="small"
                             variant="tonal"
@@ -234,11 +237,11 @@ async function handleSimularSensor() {
                     <div class="text-h3 font-weight-bold mb-3" :class="{ 'text-red': avisoRecusas }">
                         {{ store.estado.recusas }}
                     </div>
-                    <v-chip v-if="avisoRecusas" color="error" size="x-small" class="mb-3" variant="elevated">
+                    <DsChip v-if="avisoRecusas" color="error" size="x-small" variant="elevated" class="mb-3">
                         ELIMINAÇÃO
-                    </v-chip>
+                    </DsChip>
                     <div class="d-flex justify-center ga-3">
-                        <v-btn
+                        <DsBtn
                             icon="mdi-minus"
                             size="small"
                             variant="tonal"
@@ -246,7 +249,7 @@ async function handleSimularSensor() {
                             :disabled="!store.podeDesfazerRecusa || store.actionLoading"
                             @click="handleDesfazerRecusa"
                         />
-                        <v-btn
+                        <DsBtn
                             icon="mdi-plus"
                             size="small"
                             variant="tonal"
@@ -264,7 +267,7 @@ async function handleSimularSensor() {
             <div class="text-overline text-medium-emphasis mb-3">Preparar Prova</div>
             <v-row align="center">
                 <v-col cols="12" md="8">
-                    <v-select
+                    <DsSelect
                         v-model="inscricaoSelecionada"
                         :items="inscricaoOptions"
                         label="Inscrição Pendente"
@@ -275,7 +278,7 @@ async function handleSimularSensor() {
                     />
                 </v-col>
                 <v-col cols="12" md="4">
-                    <v-btn
+                    <DsBtn
                         color="amber-darken-2"
                         block
                         size="large"
@@ -285,7 +288,7 @@ async function handleSimularSensor() {
                     >
                         <v-icon start>mdi-play-box</v-icon>
                         Preparar
-                    </v-btn>
+                    </DsBtn>
                 </v-col>
             </v-row>
         </v-card>
@@ -295,7 +298,7 @@ async function handleSimularSensor() {
             <div class="text-overline text-medium-emphasis mb-4">Controles da Prova</div>
             <v-row>
                 <v-col cols="6" md="3">
-                    <v-btn
+                    <DsBtn
                         color="blue"
                         block
                         size="large"
@@ -305,10 +308,10 @@ async function handleSimularSensor() {
                     >
                         <v-icon start>mdi-flag</v-icon>
                         Autorizar
-                    </v-btn>
+                    </DsBtn>
                 </v-col>
                 <v-col cols="6" md="3">
-                    <v-btn
+                    <DsBtn
                         color="red"
                         block
                         size="large"
@@ -317,10 +320,10 @@ async function handleSimularSensor() {
                     >
                         <v-icon start>mdi-stop</v-icon>
                         Forçar Fim
-                    </v-btn>
+                    </DsBtn>
                 </v-col>
                 <v-col cols="6" md="3">
-                    <v-btn
+                    <DsBtn
                         color="green"
                         block
                         size="large"
@@ -329,10 +332,10 @@ async function handleSimularSensor() {
                     >
                         <v-icon start>mdi-check-bold</v-icon>
                         Confirmar
-                    </v-btn>
+                    </DsBtn>
                 </v-col>
                 <v-col cols="6" md="3">
-                    <v-btn
+                    <DsBtn
                         color="grey-darken-1"
                         block
                         size="large"
@@ -341,7 +344,7 @@ async function handleSimularSensor() {
                     >
                         <v-icon start>mdi-refresh</v-icon>
                         Reset
-                    </v-btn>
+                    </DsBtn>
                 </v-col>
             </v-row>
         </v-card>
@@ -352,7 +355,7 @@ async function handleSimularSensor() {
                 <v-icon size="small" color="grey-darken-1">mdi-bug</v-icon>
                 <span class="text-overline text-medium-emphasis">Simulação / Desenvolvimento</span>
             </div>
-            <v-btn
+            <DsBtn
                 variant="outlined"
                 color="grey-darken-1"
                 :disabled="!store.podeSimularSensor || store.actionLoading"
@@ -360,7 +363,7 @@ async function handleSimularSensor() {
             >
                 <v-icon start>mdi-access-point</v-icon>
                 Simular Sensor
-            </v-btn>
+            </DsBtn>
         </v-card>
 
         <!-- Dados da inscrição ativa -->
@@ -426,8 +429,8 @@ async function handleSimularSensor() {
 .timer-card,
 .counter-card,
 .section-card {
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
+    border: 1px solid var(--ds-border);
+    border-radius: 0;
 }
 
 .timer-display {

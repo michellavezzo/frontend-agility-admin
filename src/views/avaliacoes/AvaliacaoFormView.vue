@@ -6,6 +6,12 @@ import { useProvasStore } from '@/stores/provas'
 import { useJuizesStore } from '@/stores/juizes'
 import { useNotificationStore } from '@/stores/notification'
 import { avaliacoesApi } from '@/api/avaliacoes'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
+import DsTextarea from '@/components/ui/DsTextarea.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,11 +22,10 @@ const notification = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
-const form = ref()
 
 const formData = ref({
-  id_prova: 0,
-  id_juiz: 0,
+  id_prova: null as number | null,
+  id_juiz: null as number | null,
   diretor_prova: '',
   comentarios: '',
 })
@@ -56,13 +61,12 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
     const payload = {
       ...formData.value,
+      id_prova: formData.value.id_prova!,
+      id_juiz: formData.value.id_juiz!,
       comentarios: formData.value.comentarios || null,
     }
     if (isEdit.value) {
@@ -83,16 +87,14 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Nova' }} Avaliação</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Nova'} Avaliação`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
-    <v-card class="form-card" flat>
-      <v-form ref="form" @submit.prevent="save">
+    <FormCard :saving="saving" @submit="save" @cancel="router.back()">
         <v-row>
           <v-col cols="12" md="6">
-            <v-select
+            <DsSelect
               v-model="formData.id_prova"
               :items="provaOptions"
               label="Prova"
@@ -100,21 +102,16 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="6">
-            <v-select v-model="formData.id_juiz" :items="juizOptions" label="Juiz" :rules="[rules.required]" />
+            <DsSelect v-model="formData.id_juiz" :items="juizOptions" label="Juiz" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model="formData.diretor_prova" label="Diretor da Prova" :rules="[rules.required]" />
+            <DsTextField v-model="formData.diretor_prova" label="Diretor da Prova" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12">
-            <v-textarea v-model="formData.comentarios" label="Comentários" rows="3" />
+            <DsTextarea v-model="formData.comentarios" label="Comentários" rows="3" />
           </v-col>
         </v-row>
 
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving">Salvar</v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    </FormCard>
   </div>
 </template>

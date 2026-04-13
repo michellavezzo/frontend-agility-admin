@@ -4,6 +4,9 @@ import { useCompeticoesStore } from '@/stores/competicoes'
 import { useUsersStore } from '@/stores/users'
 import { useNotificationStore } from '@/stores/notification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
 import type { Competicao } from '@/types'
 
 const store = useCompeticoesStore()
@@ -25,8 +28,6 @@ const userMap = computed(() => {
   for (const u of users.items) map.set(u.id, u.name)
   return map
 })
-
-const search = ref('')
 
 onMounted(() => {
   store.fetchAll()
@@ -52,37 +53,18 @@ async function handleDelete(item: Competicao) {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Competições</h1>
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'competicoes-create' }">Nova</v-btn>
-    </div>
+    <PageHeader title="Competições">
+      <DsBtn color="primary" prepend-icon="mdi-plus" :to="{ name: 'competicoes-create' }">Nova</DsBtn>
+    </PageHeader>
 
-    <v-card class="table-card" flat>
-      <v-toolbar flat color="transparent" class="px-4 pt-2">
-        <v-text-field
-          v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Buscar"
-          single-line
-          hide-details
-          clearable
-          density="compact"
-          class="mr-4"
-          style="max-width: 320px;"
-        />
-      </v-toolbar>
-      <v-data-table :headers="headers" :items="store.items" :loading="store.loading" :search="search" hover>
-        <template #item.data="{ item }">{{ formatDate(item.data) }}</template>
-        <template #item.responsavel_id="{ item }">{{ userMap.get(item.responsavel_id) ?? item.responsavel_id }}</template>
-        <template #item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'competicoes-edit', params: { id: item.id_competicao } }" />
-          <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
-        </template>
-        <template #no-data>
-          <div class="text-center pa-6 text-medium-emphasis">Nenhuma competição cadastrada</div>
-        </template>
-      </v-data-table>
-    </v-card>
+    <DataTable :headers="headers" :items="store.items" :loading="store.loading" no-data-text="Nenhuma competição cadastrada">
+      <template #item.data="{ item }">{{ formatDate(item.data) }}</template>
+      <template #item.responsavel_id="{ item }">{{ userMap.get(item.responsavel_id) ?? item.responsavel_id }}</template>
+      <template #item.actions="{ item }">
+        <DsBtn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'competicoes-edit', params: { id: item.id_competicao } }" />
+        <DsBtn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
+      </template>
+    </DataTable>
 
     <ConfirmDialog ref="confirmDialog" />
   </div>

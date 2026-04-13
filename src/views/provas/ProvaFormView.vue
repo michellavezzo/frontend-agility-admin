@@ -5,6 +5,12 @@ import { useProvasStore } from '@/stores/provas'
 import { useCompeticoesStore } from '@/stores/competicoes'
 import { useNotificationStore } from '@/stores/notification'
 import { provasApi } from '@/api/provas'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
+import DsTextarea from '@/components/ui/DsTextarea.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,10 +20,9 @@ const notification = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
-const form = ref()
 
 const formData = ref({
-  id_competicao: 0,
+  id_competicao: null as number | null,
   categoria: '',
   classe: '',
   num_obstaculos: 0,
@@ -60,13 +65,11 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
     const payload = {
       ...formData.value,
+      id_competicao: formData.value.id_competicao!,
       descricao: formData.value.descricao || null,
     }
     if (isEdit.value) {
@@ -87,16 +90,14 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Nova' }} Prova</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Nova'} Prova`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
-    <v-card class="form-card" flat>
-      <v-form ref="form" @submit.prevent="save">
+    <FormCard :saving="saving" @submit="save" @cancel="router.back()">
         <v-row>
           <v-col cols="12" md="6">
-            <v-select
+            <DsSelect
               v-model="formData.id_competicao"
               :items="competicaoOptions"
               label="Competição"
@@ -104,36 +105,31 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="formData.categoria" label="Categoria" :rules="[rules.required]" />
+            <DsTextField v-model="formData.categoria" label="Categoria" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="formData.classe" label="Classe" :rules="[rules.required]" />
+            <DsTextField v-model="formData.classe" label="Classe" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model.number="formData.num_obstaculos" label="Nº Obstáculos" type="number" :rules="[rules.required]" />
+            <DsTextField v-model="formData.num_obstaculos" label="Nº Obstáculos" type="number" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model.number="formData.comprimento_pista" label="Comprim. Pista (m)" type="number" step="0.01" :rules="[rules.required]" />
+            <DsTextField v-model="formData.comprimento_pista" label="Comprim. Pista (m)" type="number" step="0.01" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model.number="formData.tsp" label="TSP (s)" type="number" step="0.01" :rules="[rules.required]" />
+            <DsTextField v-model="formData.tsp" label="TSP (s)" type="number" step="0.01" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model.number="formData.tmp" label="TMP (s)" type="number" step="0.01" :rules="[rules.required]" />
+            <DsTextField v-model="formData.tmp" label="TMP (s)" type="number" step="0.01" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field v-model.number="formData.vel_media_necessaria" label="Vel. Média Necessária (m/s)" type="number" step="0.01" :rules="[rules.required]" />
+            <DsTextField v-model="formData.vel_media_necessaria" label="Vel. Média Necessária (m/s)" type="number" step="0.01" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12">
-            <v-textarea v-model="formData.descricao" label="Descrição" rows="3" />
+            <DsTextarea v-model="formData.descricao" label="Descrição" rows="3" />
           </v-col>
         </v-row>
 
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving">Salvar</v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    </FormCard>
   </div>
 </template>

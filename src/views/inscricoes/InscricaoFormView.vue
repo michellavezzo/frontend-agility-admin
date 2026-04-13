@@ -8,6 +8,12 @@ import { useCompetidoresStore } from '@/stores/competidores'
 import { useCaesStore } from '@/stores/caes'
 import { useNotificationStore } from '@/stores/notification'
 import { inscricoesApi } from '@/api/inscricoes'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
+import DsAutocomplete from '@/components/ui/DsAutocomplete.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +27,6 @@ const notification = useNotificationStore()
 const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
 const loadingData = ref(true)
-const form = ref()
 
 const formData = ref({
   id_prova: null as number | null,
@@ -93,9 +98,6 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
     const payload = {
@@ -123,10 +125,9 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Nova' }} Inscrição</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Nova'} Inscrição`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
     <!-- Aviso de dependências -->
     <v-alert
@@ -136,7 +137,7 @@ async function save() {
       density="compact"
       class="mb-5"
       icon="mdi-alert-circle"
-      rounded="lg"
+      rounded="0"
     >
       Para criar uma inscrição, é necessário ter pelo menos uma <strong>prova</strong>,
       um <strong>competidor</strong> e um <strong>cão</strong> cadastrados.
@@ -145,13 +146,13 @@ async function save() {
       </router-link>
     </v-alert>
 
-    <v-card class="form-card" flat>
-      <v-progress-linear v-if="loadingData" indeterminate color="primary" class="mb-4" />
-
-      <v-form ref="form" @submit.prevent="save">
+    <FormCard :saving="saving" :submit-disabled="!temDependencias && !isEdit" @submit="save" @cancel="router.back()">
+      <template #prepend>
+        <v-progress-linear v-if="loadingData" indeterminate color="primary" class="mb-4" />
+      </template>
         <v-row>
           <v-col cols="12" md="6">
-            <v-autocomplete
+            <DsAutocomplete
               v-model="formData.id_prova"
               :items="provaOptions"
               label="Prova"
@@ -162,7 +163,7 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="6">
-            <v-autocomplete
+            <DsAutocomplete
               v-model="formData.id_competidor"
               :items="competidorOptions"
               label="Competidor"
@@ -173,7 +174,7 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="4">
-            <v-autocomplete
+            <DsAutocomplete
               v-model="formData.microchip_cao"
               :items="caoOptions"
               label="Cão"
@@ -184,7 +185,7 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field
+            <DsTextField
               v-model="formData.colete_competidor"
               label="Nº do Colete"
               :rules="[rules.required]"
@@ -194,7 +195,7 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="4">
-            <v-select
+            <DsSelect
               v-model="formData.status"
               :items="statusOptions"
               label="Status"
@@ -204,13 +205,6 @@ async function save() {
           </v-col>
         </v-row>
 
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving" :disabled="!temDependencias && !isEdit">
-            Salvar
-          </v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    </FormCard>
   </div>
 </template>

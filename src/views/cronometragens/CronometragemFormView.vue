@@ -5,6 +5,11 @@ import { useCronometragensStore } from '@/stores/cronometragens'
 import { useInscricoesStore } from '@/stores/inscricoes'
 import { useNotificationStore } from '@/stores/notification'
 import { cronometragensApi } from '@/api/cronometragens'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FormCard from '@/components/ui/FormCard.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
+import DsTextField from '@/components/ui/DsTextField.vue'
+import DsSelect from '@/components/ui/DsSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,10 +19,9 @@ const notification = useNotificationStore()
 
 const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
-const form = ref()
 
 const formData = ref({
-  id_inscricao: 0,
+  id_inscricao: null as number | null,
   tempo_inicial: '',
   tempo_final: undefined as string | undefined,
   status: '',
@@ -54,16 +58,14 @@ onMounted(async () => {
 })
 
 async function save() {
-  const { valid } = await form.value.validate()
-  if (!valid) return
-
   saving.value = true
   try {
+    const payload = { ...formData.value, id_inscricao: formData.value.id_inscricao! }
     if (isEdit.value) {
-      await store.update(Number(route.params.id), formData.value)
+      await store.update(Number(route.params.id), payload)
       notification.notify('Cronometragem atualizada com sucesso')
     } else {
-      await store.create(formData.value)
+      await store.create(payload)
       notification.notify('Cronometragem criada com sucesso')
     }
     router.push({ name: 'cronometragens' })
@@ -77,16 +79,14 @@ async function save() {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Editar' : 'Nova' }} Cronometragem</h1>
-      <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</v-btn>
-    </div>
+    <PageHeader :title="`${isEdit ? 'Editar' : 'Nova'} Cronometragem`">
+      <DsBtn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">Voltar</DsBtn>
+    </PageHeader>
 
-    <v-card class="form-card" flat>
-      <v-form ref="form" @submit.prevent="save">
+    <FormCard :saving="saving" @submit="save" @cancel="router.back()">
         <v-row>
           <v-col cols="12" md="6">
-            <v-select
+            <DsSelect
               v-model="formData.id_inscricao"
               :items="inscricaoOptions"
               label="Inscrição"
@@ -94,27 +94,22 @@ async function save() {
             />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="formData.tipo" label="Tipo" :rules="[rules.required]" />
+            <DsTextField v-model="formData.tipo" label="Tipo" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="formData.status" label="Status" :rules="[rules.required]" />
+            <DsTextField v-model="formData.status" label="Status" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field v-model="formData.tempo_inicial" label="Tempo Inicial" :rules="[rules.required]" />
+            <DsTextField v-model="formData.tempo_inicial" label="Tempo Inicial" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field v-model="formData.tempo_final" label="Tempo Final" />
+            <DsTextField v-model="formData.tempo_final" label="Tempo Final" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field v-model.number="formData.tempo_oficial" label="Tempo Oficial (s)" type="number" step="0.001" />
+            <DsTextField v-model="formData.tempo_oficial" label="Tempo Oficial (s)" type="number" step="0.001" />
           </v-col>
         </v-row>
 
-        <div class="form-actions">
-          <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-          <v-btn color="primary" type="submit" :loading="saving">Salvar</v-btn>
-        </div>
-      </v-form>
-    </v-card>
+    </FormCard>
   </div>
 </template>

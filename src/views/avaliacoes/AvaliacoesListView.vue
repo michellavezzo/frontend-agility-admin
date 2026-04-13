@@ -5,6 +5,9 @@ import { useProvasStore } from '@/stores/provas'
 import { useJuizesStore } from '@/stores/juizes'
 import { useNotificationStore } from '@/stores/notification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import DsBtn from '@/components/ui/DsBtn.vue'
 import type { Avaliacao } from '@/types'
 
 const store = useAvaliacoesStore()
@@ -34,8 +37,6 @@ const juizMap = computed(() => {
   return map
 })
 
-const search = ref('')
-
 onMounted(() => {
   store.fetchAll()
   provas.fetchAll()
@@ -56,44 +57,25 @@ async function handleDelete(item: Avaliacao) {
 
 <template>
   <div>
-    <div class="page-header">
-      <h1>Avaliações</h1>
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="{ name: 'avaliacoes-create' }">Nova</v-btn>
-    </div>
+    <PageHeader title="Avaliações">
+      <DsBtn color="primary" prepend-icon="mdi-plus" :to="{ name: 'avaliacoes-create' }">Nova</DsBtn>
+    </PageHeader>
 
-    <v-card class="table-card" flat>
-      <v-toolbar flat color="transparent" class="px-4 pt-2">
-        <v-text-field
-          v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Buscar"
-          single-line
-          hide-details
-          clearable
-          density="compact"
-          class="mr-4"
-          style="max-width: 320px;"
-        />
-      </v-toolbar>
-      <v-data-table :headers="headers" :items="store.items" :loading="store.loading" :search="search" hover>
-        <template #item.id_prova="{ item }">
-          {{ provaMap.get(item.id_prova) || item.id_prova }}
-        </template>
-        <template #item.id_juiz="{ item }">
-          {{ juizMap.get(item.id_juiz) || item.id_juiz }}
-        </template>
-        <template #item.comentarios="{ item }">
-          {{ item.comentarios || '—' }}
-        </template>
-        <template #item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'avaliacoes-edit', params: { id: item.id_avaliacao } }" />
-          <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
-        </template>
-        <template #no-data>
-          <div class="text-center pa-6 text-medium-emphasis">Nenhuma avaliação cadastrada</div>
-        </template>
-      </v-data-table>
-    </v-card>
+    <DataTable :headers="headers" :items="store.items" :loading="store.loading" no-data-text="Nenhuma avaliação cadastrada">
+      <template #item.id_prova="{ item }">
+        {{ provaMap.get(item.id_prova) || item.id_prova }}
+      </template>
+      <template #item.id_juiz="{ item }">
+        {{ juizMap.get(item.id_juiz) || item.id_juiz }}
+      </template>
+      <template #item.comentarios="{ item }">
+        {{ item.comentarios || '—' }}
+      </template>
+      <template #item.actions="{ item }">
+        <DsBtn icon="mdi-pencil" size="small" variant="text" :to="{ name: 'avaliacoes-edit', params: { id: item.id_avaliacao } }" />
+        <DsBtn icon="mdi-delete" size="small" variant="text" color="error" @click="handleDelete(item)" />
+      </template>
+    </DataTable>
 
     <ConfirmDialog ref="confirmDialog" />
   </div>
