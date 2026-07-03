@@ -178,7 +178,8 @@ async function handleSimularSensor() {
             icon="mdi-wifi-off"
             rounded="0"
         >
-            Sem conexão com o backend. O cronômetro continua rodando no servidor. Tentando reconectar...
+            Sem conexão em tempo real com o backend. O cronômetro continua rodando no servidor.
+            Tentando reconectar o WebSocket...
         </v-alert>
 
         <!-- Timers -->

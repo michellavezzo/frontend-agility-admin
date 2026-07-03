@@ -48,6 +48,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null
     let reconnectDelay = 500
     let shouldReconnect = false
+    let currentSocketUrl = ''
 
     // ── Getters de habilitação de botões ──
     const estadoAtual = computed<EstadoProva>(() => estado.value.estado)
@@ -128,25 +129,34 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
     }
 
     function connectWebSocket() {
-        socket = new WebSocket(websocketUrl('/ws/prova-ativa'))
-        socket.onopen = () => {
+        currentSocketUrl = websocketUrl('/ws/prova-ativa')
+        const ws = new WebSocket(currentSocketUrl)
+        socket = ws
+        ws.onopen = () => {
+            if (socket !== ws) return
             connected.value = true
             reconnectDelay = 500
             lastError.value = null
         }
-        socket.onmessage = (event) => {
+        ws.onmessage = (event) => {
+            if (socket !== ws) return
             const message = JSON.parse(event.data) as { tipo?: string; data?: ProvaAtivaEstado }
             if (message.tipo === 'estado' && message.data) {
                 applySnapshot(message.data)
             }
         }
-        socket.onclose = () => {
+        ws.onclose = () => {
+            if (socket !== ws) return
             socket = null
+            if (!shouldReconnect) return
             connected.value = false
+            lastError.value = `Canal WebSocket desconectado (${currentSocketUrl})`
             scheduleReconnect()
         }
-        socket.onerror = () => {
-            socket?.close()
+        ws.onerror = () => {
+            if (socket !== ws) return
+            lastError.value = `Falha ao conectar no WebSocket (${currentSocketUrl})`
+            ws.close()
         }
     }
 

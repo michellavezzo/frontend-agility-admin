@@ -1,9 +1,10 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+const BASE_URL = RAW_BASE_URL.trim().replace(/\/$/, '')
 
 export function websocketUrl(path: string): string {
     const base = new URL(BASE_URL, window.location.origin)
     base.protocol = base.protocol === 'https:' ? 'wss:' : 'ws:'
-    base.pathname = `${base.pathname.replace(/\/$/, '')}${path}`
+    base.pathname = `${base.pathname.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
     base.search = ''
     base.hash = ''
     return base.toString()
