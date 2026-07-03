@@ -26,6 +26,7 @@ const resultadoItems = [
 
 const sistemaItems = [
   { title: 'Usuários', icon: 'mdi-account-cog-outline', to: '/users' },
+  { title: 'Configurações', icon: 'mdi-tune-variant', to: '/config' },
 ]
 </script>
 

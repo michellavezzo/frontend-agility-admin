@@ -39,6 +39,11 @@ const router = createRouter({
             name: 'users-edit',
             component: () => import('@/views/users/UserFormView.vue'),
         },
+        {
+            path: '/config',
+            name: 'config',
+            component: () => import('@/views/config/ConfigView.vue'),
+        },
 
         // ── Competições ──
         {

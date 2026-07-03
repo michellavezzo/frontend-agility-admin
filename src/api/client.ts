@@ -18,7 +18,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
     if (!res.ok) {
         const body = await res.text().catch(() => '')
-        throw new Error(`HTTP ${res.status}: ${body || res.statusText}`)
+        let detail = body || res.statusText
+        try {
+            const parsed = JSON.parse(body) as { detail?: unknown }
+            if (typeof parsed.detail === 'string') {
+                detail = parsed.detail
+            }
+        } catch {
+            // Mantem o corpo original quando a resposta nao for JSON.
+        }
+        throw new Error(`HTTP ${res.status}: ${detail}`)
     }
 
     if (res.status === 204 || res.headers.get('content-length') === '0') {

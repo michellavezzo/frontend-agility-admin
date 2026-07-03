@@ -340,7 +340,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
     function handleActionError(e: unknown) {
         const msg = (e as Error).message
         if (msg.includes('409')) {
-            lastError.value = 'Ação não permitida no estado atual'
+            lastError.value = msg.replace(/^HTTP 409:\s*/, '') || 'Ação não permitida no estado atual'
         } else if (msg.includes('404')) {
             lastError.value = 'Inscrição não encontrada'
         } else {

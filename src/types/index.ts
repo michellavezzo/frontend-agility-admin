@@ -144,3 +144,94 @@ export interface ConfirmarResponse {
     top: number
     tia: number
 }
+
+// ── Configuração IR ──
+export interface IrCalibrationRecommendation {
+    frequency_hz: number
+    duty_cycle: number
+    burst_enabled: boolean
+    burst_on: number
+    burst_off: number
+    sensor_active_level: 'LOW' | 'HIGH'
+    sensor_signal_timeout: number
+    sensor_trigger_confirm: number
+    sensor_ready_min_ratio: number
+    aligned_level_name: string
+    break_level_name: string
+    scan_signal_pct: number
+    scan_delta: number
+    pwm_backend?: string
+    exports?: string[]
+}
+
+export interface IrCalibrationResult {
+    ok: boolean
+    started_at: string
+    finished_at: string
+    duration_s: number
+    emitter_backend: string
+    baseline: Record<string, number | string | null>
+    sensitive: Array<{
+        freq: number
+        signal_level_name: string
+        signal_pct: number
+        delta: number
+        stats: Record<string, number | string | null>
+    }>
+    hold: Array<{
+        scan: {
+            freq: number
+            signal_level_name: string
+            signal_pct: number
+            delta: number
+        }
+        hold: Record<string, number | boolean | string | null>
+    }>
+    recommendation: IrCalibrationRecommendation | null
+}
+
+export interface IrCalibrationState {
+    running: boolean
+    phase: string | null
+    frequency_hz: number | null
+    started_at: string | null
+    finished_at: string | null
+    trigger?: string
+    error: string | null
+    last_result: IrCalibrationResult | null
+    store_path: string
+}
+
+export interface IrHardwareStatus {
+    raspberry_pi: boolean
+    raspberry_modelo: string
+    gpio_disponivel: boolean
+    gpio_pronto: boolean
+    gpio_erro: string | null
+    sensor_gpio_bcm: number
+    sensor_estado_feixe: string
+    sensor_nivel_atual: number | null
+    sensor_active_level: 'LOW' | 'HIGH'
+    sensor_signal_timeout: number
+    pigpio_disponivel: boolean
+    pigpio_conectado: boolean
+    pigpio_import_erro: string | null
+    emissor_gpio_bcm: number
+    emissor_ativo: boolean
+    emissor_modo: string | null
+    emissor_erro: string | null
+    emissor_pwm_backend: string
+    emissor_rajada_habilitada: boolean
+    emissor_rajada_on: number
+    emissor_rajada_off: number
+    frequencia_hz: number
+    duty_cycle: number
+}
+
+export interface IrConfigStatus {
+    prova_estado: EstadoProva
+    hardware: IrHardwareStatus
+    calibration: IrCalibrationState
+    saved_calibration: IrCalibrationResult | null
+    electrical_warning: string
+}
