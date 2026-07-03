@@ -113,6 +113,8 @@ export type EstadoProva = 'idle' | 'preparado' | 'autorizado' | 'rodando' | 'fin
 export interface ProvaAtivaEstado {
     estado: EstadoProva
     id_inscricao: number | null
+    versao: number
+    atualizado_em: string | null
     tia_decorrido: number
     tia_str: string
     top_decorrido: number

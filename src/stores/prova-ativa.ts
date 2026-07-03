@@ -2,12 +2,13 @@ import { ref, computed, readonly } from 'vue'
 import { defineStore } from 'pinia'
 import type { ProvaAtivaEstado, EstadoProva, Inscricao } from '@/types'
 import { provaAtivaApi } from '@/api/prova-ativa'
-
-const POLL_INTERVAL = 250
+import { websocketUrl } from '@/api/client'
 
 const ESTADO_INICIAL: ProvaAtivaEstado = {
     estado: 'idle',
     id_inscricao: null,
+    versao: 0,
+    atualizado_em: null,
     tia_decorrido: 0,
     tia_str: '00:00.000',
     top_decorrido: 0,
@@ -42,8 +43,11 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
     const interpolatedTop = ref(0)
     let animFrameId: number | null = null
 
-    // ── Polling ──
-    let pollTimer: ReturnType<typeof setTimeout> | null = null
+    // ── WebSocket ──
+    let socket: WebSocket | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let reconnectDelay = 500
+    let shouldReconnect = false
 
     // ── Getters de habilitação de botões ──
     const estadoAtual = computed<EstadoProva>(() => estado.value.estado)
@@ -107,35 +111,73 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
     const tiaDisplay = computed(() => formatTime(interpolatedTia.value))
     const topDisplay = computed(() => formatTime(interpolatedTop.value))
 
-    // ── Polling ──
-    async function poll() {
-        try {
-            const data = await provaAtivaApi.getEstado()
-            estado.value = data
-            snapshotTime.value = performance.now()
-            interpolatedTia.value = data.tia_decorrido
-            interpolatedTop.value = data.top_decorrido
+    function applySnapshot(data: ProvaAtivaEstado) {
+        if (
+            estado.value.versao !== undefined &&
+            data.versao !== undefined &&
+            data.versao < estado.value.versao
+        ) {
+            return
+        }
+        estado.value = data
+        snapshotTime.value = performance.now()
+        interpolatedTia.value = data.tia_decorrido
+        interpolatedTop.value = data.top_decorrido
+        connected.value = true
+        lastError.value = null
+    }
+
+    function connectWebSocket() {
+        socket = new WebSocket(websocketUrl('/ws/prova-ativa'))
+        socket.onopen = () => {
             connected.value = true
+            reconnectDelay = 500
             lastError.value = null
-        } catch {
+        }
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data) as { tipo?: string; data?: ProvaAtivaEstado }
+            if (message.tipo === 'estado' && message.data) {
+                applySnapshot(message.data)
+            }
+        }
+        socket.onclose = () => {
+            socket = null
             connected.value = false
+            scheduleReconnect()
+        }
+        socket.onerror = () => {
+            socket?.close()
         }
     }
 
-    function startPolling() {
-        stopPolling()
-        async function loop() {
-            await poll()
-            pollTimer = setTimeout(loop, POLL_INTERVAL)
+    function scheduleReconnect() {
+        if (!shouldReconnect) return
+        if (reconnectTimer !== null) {
+            clearTimeout(reconnectTimer)
         }
-        loop()
+        reconnectTimer = setTimeout(() => {
+            reconnectTimer = null
+            connectWebSocket()
+        }, reconnectDelay)
+        reconnectDelay = Math.min(reconnectDelay * 2, 5000)
+    }
+
+    function startRealtime() {
+        stopRealtime()
+        shouldReconnect = true
+        connectWebSocket()
         startInterpolation()
     }
 
-    function stopPolling() {
-        if (pollTimer !== null) {
-            clearTimeout(pollTimer)
-            pollTimer = null
+    function stopRealtime() {
+        shouldReconnect = false
+        if (reconnectTimer !== null) {
+            clearTimeout(reconnectTimer)
+            reconnectTimer = null
+        }
+        if (socket !== null) {
+            socket.close()
+            socket = null
         }
         stopInterpolation()
     }
@@ -157,9 +199,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
         actionLoading.value = true
         try {
             const data = await provaAtivaApi.preparar(idInscricao)
-            estado.value = data
-            snapshotTime.value = performance.now()
-            lastError.value = null
+            applySnapshot(data)
         } catch (e) {
             handleActionError(e)
         } finally {
@@ -171,9 +211,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
         actionLoading.value = true
         try {
             const data = await provaAtivaApi.autorizar()
-            estado.value = data
-            snapshotTime.value = performance.now()
-            lastError.value = null
+            applySnapshot(data)
         } catch (e) {
             handleActionError(e)
         } finally {
@@ -241,9 +279,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
         actionLoading.value = true
         try {
             const data = await provaAtivaApi.forcarFim()
-            estado.value = data
-            snapshotTime.value = performance.now()
-            lastError.value = null
+            applySnapshot(data)
         } catch (e) {
             handleActionError(e)
         } finally {
@@ -271,9 +307,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
         actionLoading.value = true
         try {
             const data = await provaAtivaApi.reset()
-            estado.value = data
-            snapshotTime.value = performance.now()
-            lastError.value = null
+            applySnapshot(data)
         } catch (e) {
             handleActionError(e)
         } finally {
@@ -285,9 +319,7 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
         actionLoading.value = true
         try {
             const data = await provaAtivaApi.simularSensor()
-            estado.value = data
-            snapshotTime.value = performance.now()
-            lastError.value = null
+            applySnapshot(data)
         } catch (e) {
             handleActionError(e)
         } finally {
@@ -330,8 +362,8 @@ export const useProvaAtivaStore = defineStore('prova-ativa', () => {
         podeDesfazerFalta,
         podeDesfazerRecusa,
         // Actions
-        startPolling,
-        stopPolling,
+        startRealtime,
+        stopRealtime,
         fetchInscricoesPendentes,
         preparar,
         autorizar,

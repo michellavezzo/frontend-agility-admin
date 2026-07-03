@@ -47,11 +47,11 @@ const avisoRecusas = computed(() => store.estado.recusas >= 3)
 // ── Lifecycle ──
 onMounted(async () => {
     await store.fetchInscricoesPendentes()
-    store.startPolling()
+    store.startRealtime()
 })
 
 onUnmounted(() => {
-    store.stopPolling()
+    store.stopRealtime()
 })
 
 // ── Actions ──
