@@ -160,8 +160,33 @@ export interface IrCalibrationRecommendation {
     break_level_name: string
     scan_signal_pct: number
     scan_delta: number
+    minimum_stable_duty?: number | null
+    burst_max_signal_gap?: number | null
+    break_release_s?: number | null
+    reacquire_s?: number | null
+    physical_break_validated?: boolean
     pwm_backend?: string
     exports?: string[]
+}
+
+export interface IrCalibrationRejectedFrequency {
+    freq: number
+    reasons: string[]
+    signal_level_name?: string
+    noise_signal_pct?: number
+    delta?: number
+}
+
+export interface IrCalibrationOperationalResult {
+    freq: number
+    minimum_stable_duty?: number | null
+    burst_max_signal_gap?: number | null
+    max_signal_gap?: number | null
+    break_release_s?: number | null
+    reacquire_s?: number | null
+    break_detected?: boolean
+    signal_timeout?: number | null
+    timeout?: number | null
 }
 
 export interface IrCalibrationResult {
@@ -188,6 +213,26 @@ export interface IrCalibrationResult {
         hold: Record<string, number | boolean | string | null>
     }>
     recommendation: IrCalibrationRecommendation | null
+    noise_scan?: Array<{
+        window_index: number
+        candidate_frequency_hz: number
+        stats: Record<string, number | boolean | string | null>
+    }>
+    rejected?: IrCalibrationRejectedFrequency[]
+    margin?: IrCalibrationOperationalResult[]
+    burst?: IrCalibrationOperationalResult[]
+    break_tests?: IrCalibrationOperationalResult[]
+    diagnostics?: {
+        noise_windows?: number
+        active_scans?: number
+        sensitive_candidates?: number
+        finalists?: number
+        valid_candidates?: number
+        rejected_candidates?: number
+        reason_counts?: Record<string, number>
+        physical_break_validated?: boolean
+        physical_validation_warning?: string
+    }
 }
 
 export interface IrCalibrationState {
@@ -198,6 +243,7 @@ export interface IrCalibrationState {
     finished_at: string | null
     trigger?: string
     error: string | null
+    last_attempt?: IrCalibrationResult | null
     last_result: IrCalibrationResult | null
     store_path: string
 }

@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { configApi } from '@/api/config'
 import { useNotificationStore } from '@/stores/notification'
-import type { IrConfigStatus } from '@/types'
+import type { IrCalibrationOperationalResult, IrConfigStatus } from '@/types'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import DsBtn from '@/components/ui/DsBtn.vue'
 import DsChip from '@/components/ui/DsChip.vue'
@@ -15,10 +15,15 @@ const calibrating = ref(false)
 
 const hardware = computed(() => status.value?.hardware ?? null)
 const calibration = computed(() => status.value?.calibration ?? null)
-const lastResult = computed(
-    () => calibration.value?.last_result ?? status.value?.saved_calibration ?? null,
+const displayedAttempt = computed(
+    () =>
+        calibration.value?.last_attempt ??
+        calibration.value?.last_result ??
+        status.value?.saved_calibration ??
+        null,
 )
-const recommendation = computed(() => lastResult.value?.recommendation ?? null)
+const recommendation = computed(() => displayedAttempt.value?.recommendation ?? null)
+const diagnostics = computed(() => displayedAttempt.value?.diagnostics ?? null)
 const calibrationBlocked = computed(
     () => status.value?.prova_estado === 'autorizado' || status.value?.prova_estado === 'rodando',
 )
@@ -26,10 +31,96 @@ const canCalibrate = computed(
     () => !loading.value && !calibrating.value && !calibrationBlocked.value,
 )
 const sensitiveTop = computed(() =>
-    [...(lastResult.value?.sensitive ?? [])]
+    [...(displayedAttempt.value?.sensitive ?? [])]
         .sort((a, b) => b.signal_pct - a.signal_pct || b.delta - a.delta)
         .slice(0, 8),
 )
+const rejectedRows = computed(() => displayedAttempt.value?.rejected ?? [])
+const offWindowCount = computed(
+    () => diagnostics.value?.noise_windows ?? displayedAttempt.value?.noise_scan?.length ?? null,
+)
+const contaminatedWindowCount = computed(() => {
+    const count = diagnostics.value?.reason_counts?.noise_detected_off
+    if (typeof count === 'number') return count
+    if (!displayedAttempt.value?.rejected) return null
+    return rejectedRows.value.filter((item) => item.reasons.includes('noise_detected_off')).length
+})
+const hasDiagnostics = computed(
+    () =>
+        Boolean(diagnostics.value) ||
+        Boolean(displayedAttempt.value?.noise_scan) ||
+        Boolean(displayedAttempt.value?.rejected) ||
+        Boolean(displayedAttempt.value?.margin) ||
+        Boolean(displayedAttempt.value?.burst) ||
+        Boolean(displayedAttempt.value?.break_tests) ||
+        Boolean(
+            recommendation.value &&
+                [
+                    recommendation.value.minimum_stable_duty,
+                    recommendation.value.burst_max_signal_gap,
+                    recommendation.value.break_release_s,
+                    recommendation.value.reacquire_s,
+                    recommendation.value.physical_break_validated,
+                ].some((value) => value !== undefined),
+        ),
+)
+const physicalBreakValidated = computed(
+    () =>
+        diagnostics.value?.physical_break_validated ??
+        recommendation.value?.physical_break_validated,
+)
+const finalistMetrics = computed<IrCalibrationOperationalResult[]>(() => {
+    const metricsByFrequency = new Map<number, IrCalibrationOperationalResult>()
+    const metricFor = (freq: number) => {
+        const existing = metricsByFrequency.get(freq)
+        if (existing) return existing
+        const metric: IrCalibrationOperationalResult = { freq }
+        metricsByFrequency.set(freq, metric)
+        return metric
+    }
+
+    for (const margin of displayedAttempt.value?.margin ?? []) {
+        metricFor(margin.freq).minimum_stable_duty = margin.minimum_stable_duty
+    }
+    for (const burst of displayedAttempt.value?.burst ?? []) {
+        metricFor(burst.freq).burst_max_signal_gap =
+            burst.burst_max_signal_gap ?? burst.max_signal_gap
+    }
+    for (const breakTest of displayedAttempt.value?.break_tests ?? []) {
+        const metric = metricFor(breakTest.freq)
+        metric.break_release_s = breakTest.break_release_s
+        metric.reacquire_s = breakTest.reacquire_s
+        metric.break_detected = breakTest.break_detected
+    }
+
+    const applied = recommendation.value
+    if (
+        applied &&
+        [
+            applied.minimum_stable_duty,
+            applied.burst_max_signal_gap,
+            applied.break_release_s,
+            applied.reacquire_s,
+        ].some((value) => value !== undefined)
+    ) {
+        const metric = metricFor(applied.frequency_hz)
+        metric.minimum_stable_duty ??= applied.minimum_stable_duty
+        metric.burst_max_signal_gap ??= applied.burst_max_signal_gap
+        metric.break_release_s ??= applied.break_release_s
+        metric.reacquire_s ??= applied.reacquire_s
+    }
+
+    return [...metricsByFrequency.values()].sort((a, b) => a.freq - b.freq)
+})
+
+const rejectionReasonLabels: Record<string, string> = {
+    noise_detected_off: 'Ruído detectado com o emissor desligado',
+    insufficient_contrast: 'Contraste ativo insuficiente',
+    continuous_signal_suppressed: 'Sinal contínuo perdido no teste de saturação',
+    break_not_detected: 'Quebra ou reaquisição não detectada',
+    signal_gap_too_large: 'Intervalo de sinal exige timeout acima do limite',
+    signal_level_changed: 'Nível de sinal mudou durante o teste de duty',
+}
 
 function formatSeconds(value: number | null | undefined, digits = 3) {
     if (typeof value !== 'number' || Number.isNaN(value)) return '-'
@@ -49,6 +140,10 @@ function formatPercent(value: number | null | undefined) {
 function formatDate(value: string | null | undefined) {
     if (!value) return '-'
     return new Date(value).toLocaleString('pt-BR')
+}
+
+function formatRejectionReasons(reasons: string[]) {
+    return reasons.map((reason) => rejectionReasonLabels[reason] ?? reason).join(', ')
 }
 
 function cleanError(error: unknown) {
@@ -248,11 +343,11 @@ onMounted(loadStatus)
                         </div>
                         <div class="metric-item">
                             <span>Último teste</span>
-                            <strong>{{ formatDate(lastResult?.finished_at) }}</strong>
+                            <strong>{{ formatDate(displayedAttempt?.finished_at) }}</strong>
                         </div>
                         <div class="metric-item">
                             <span>Duração</span>
-                            <strong>{{ formatSeconds(lastResult?.duration_s) }}</strong>
+                            <strong>{{ formatSeconds(displayedAttempt?.duration_s) }}</strong>
                         </div>
                         <div class="metric-item">
                             <span>Arquivo</span>
@@ -292,7 +387,7 @@ onMounted(loadStatus)
                             {{ formatSeconds(recommendation.burst_on, 4) }} /
                             {{ formatSeconds(recommendation.burst_off, 4) }}
                         </td>
-                        <th>Timeout sinal</th>
+                        <th>Timeout recomendado</th>
                         <td>{{ formatSeconds(recommendation.sensor_signal_timeout) }}</td>
                     </tr>
                     <tr>
@@ -318,8 +413,92 @@ onMounted(loadStatus)
                 icon="mdi-information-outline"
                 rounded="0"
             >
-                Nenhuma calibração IR salva.
+                Nenhuma recomendação disponível para a tentativa exibida.
             </v-alert>
+        </v-card>
+
+        <v-card v-if="hasDiagnostics" flat class="section-card pa-5 mb-5">
+            <div class="section-title">Diagnóstico da Última Tentativa</div>
+
+            <v-alert
+                v-if="physicalBreakValidated === false"
+                type="warning"
+                variant="tonal"
+                density="compact"
+                class="mb-5"
+                icon="mdi-alert"
+                rounded="0"
+            >
+                A passagem física pelo feixe ainda não foi validada. O teste automático simulou a
+                interrupção desligando o emissor.
+            </v-alert>
+
+            <div class="metric-grid mb-5">
+                <div class="metric-item">
+                    <span>Janelas OFF</span>
+                    <strong>{{ offWindowCount ?? '-' }}</strong>
+                </div>
+                <div class="metric-item">
+                    <span>Janelas OFF contaminadas</span>
+                    <strong>{{ contaminatedWindowCount ?? '-' }}</strong>
+                </div>
+                <div class="metric-item">
+                    <span>Frequências rejeitadas</span>
+                    <strong>{{ diagnostics?.rejected_candidates ?? rejectedRows.length }}</strong>
+                </div>
+                <div class="metric-item">
+                    <span>Finalistas válidos</span>
+                    <strong>{{ diagnostics?.valid_candidates ?? '-' }}</strong>
+                </div>
+            </div>
+
+            <template v-if="rejectedRows.length">
+                <div class="section-title">Frequências Rejeitadas</div>
+
+                <v-table density="compact" class="config-table mb-5">
+                    <thead>
+                        <tr>
+                            <th>Frequência</th>
+                            <th>Motivo</th>
+                            <th>Ruído OFF</th>
+                            <th>Contraste ativo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in rejectedRows" :key="`${item.freq}-${index}`">
+                            <td>{{ formatHz(item.freq) }}</td>
+                            <td>{{ formatRejectionReasons(item.reasons) }}</td>
+                            <td>{{ formatPercent(item.noise_signal_pct) }}</td>
+                            <td>{{ formatPercent(item.delta) }}</td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </template>
+
+            <template v-if="finalistMetrics.length">
+                <div class="section-title">Métricas dos Finalistas</div>
+
+                <v-table density="compact" class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Frequência</th>
+                            <th>Duty mínimo estável</th>
+                            <th>Gap máximo da rajada</th>
+                            <th>Liberação da quebra</th>
+                            <th>Reaquisição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in finalistMetrics" :key="item.freq">
+                            <td>{{ formatHz(item.freq) }}</td>
+                            <td>{{ formatPercent(item.minimum_stable_duty) }}</td>
+                            <td>{{ formatSeconds(item.burst_max_signal_gap) }}</td>
+                            <td>{{ formatSeconds(item.break_release_s) }}</td>
+                            <td>{{ formatSeconds(item.reacquire_s) }}</td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </template>
         </v-card>
 
         <v-card v-if="sensitiveTop.length" flat class="section-card pa-5">
