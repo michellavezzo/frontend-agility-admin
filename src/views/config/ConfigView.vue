@@ -45,6 +45,12 @@ const contaminatedWindowCount = computed(() => {
     if (!displayedAttempt.value?.rejected) return null
     return rejectedRows.value.filter((item) => item.reasons.includes('noise_detected_off')).length
 })
+const continuousSuppressedCount = computed(() => {
+    const count = diagnostics.value?.continuous_suppressed_candidates
+    if (typeof count === 'number') return count
+    if (!displayedAttempt.value?.hold) return null
+    return displayedAttempt.value.hold.filter((item) => item.hold?.saturated === true).length
+})
 const hasDiagnostics = computed(
     () =>
         Boolean(diagnostics.value) ||
@@ -445,6 +451,10 @@ onMounted(loadStatus)
                 <div class="metric-item">
                     <span>Frequências rejeitadas</span>
                     <strong>{{ diagnostics?.rejected_candidates ?? rejectedRows.length }}</strong>
+                </div>
+                <div class="metric-item">
+                    <span>Supressões em portadora contínua</span>
+                    <strong>{{ continuousSuppressedCount ?? '-' }}</strong>
                 </div>
                 <div class="metric-item">
                     <span>Finalistas válidos</span>

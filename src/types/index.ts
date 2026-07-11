@@ -210,7 +210,7 @@ export interface IrCalibrationResult {
             signal_pct: number
             delta: number
         }
-        hold: Record<string, number | boolean | string | null>
+        hold: Record<string, number | boolean | string | null> | null
     }>
     recommendation: IrCalibrationRecommendation | null
     noise_scan?: Array<{
@@ -230,6 +230,8 @@ export interface IrCalibrationResult {
         valid_candidates?: number
         rejected_candidates?: number
         reason_counts?: Record<string, number>
+        continuous_suppressed_candidates?: number
+        continuous_suppression_frequencies?: number[]
         physical_break_validated?: boolean
         physical_validation_warning?: string
     }
