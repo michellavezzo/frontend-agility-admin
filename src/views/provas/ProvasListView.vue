@@ -20,7 +20,9 @@ const headers = [
   { title: 'Categoria', key: 'categoria' },
   { title: 'Classe', key: 'classe' },
   { title: 'Obstáculos', key: 'num_obstaculos', width: '110px' },
-  { title: 'Comprim. Pista', key: 'comprimento_pista', width: '130px' },
+  { title: 'Pista (m)', key: 'comprimento_pista', width: '100px' },
+  { title: 'TSP (s)', key: 'tsp', width: '90px' },
+  { title: 'TMP (s)', key: 'tmp', width: '90px' },
   { title: 'Ações', key: 'actions', sortable: false, width: '120px' },
 ]
 

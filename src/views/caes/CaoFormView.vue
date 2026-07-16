@@ -98,7 +98,7 @@ async function save() {
         <v-col cols="12" md="4">
           <DsTextField v-model="formData.categoria_salto" label="Categoria de Salto" :rules="[rules.required]" />
         </v-col>
-        <v-col cols="12" md="4" class="flex items-center">
+        <v-col cols="12" md="4" class="d-flex align-center">
           <v-checkbox v-model="formData.is_cao_branco" label="Cão Branco" hide-details />
         </v-col>
       </v-row>

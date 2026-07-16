@@ -1,4 +1,10 @@
-@import 'tailwindcss';
+/* Tailwind v4 SEM preflight: apenas theme + utilities.
+   O preflight (reset) entra em layers declaradas depois das layers do
+   Vuetify 4 e sobrescrevia estilos nativos (padding de botões, outline
+   dos campos), exigindo hacks de compensação. Sem preflight, o Vuetify
+   renderiza íntegro e as utilities do Tailwind seguem disponíveis. */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 
 /* ══════════════════════════════════════
    BMW-inspired Design System — Light Mode
@@ -42,82 +48,17 @@
   line-height: var(--ds-line-height-tight);
 }
 
-/* ── Fix Tailwind CSS v4 reset stripping Vuetify layout padding ── */
-.v-main {
-  padding-left: var(--v-layout-left) !important;
-  padding-right: var(--v-layout-right) !important;
-  padding-top: var(--v-layout-top) !important;
-  padding-bottom: var(--v-layout-bottom) !important;
-}
-
-/* ── Fix Tailwind CSS v4 reset stripping Vuetify button/chip padding ── */
-.v-btn {
-  padding-inline: 16px !important;
-}
-.v-btn--size-x-small {
-  padding-inline: 8px !important;
-}
-.v-btn--size-small {
-  padding-inline: 12px !important;
-}
-.v-btn--size-large {
-  padding-inline: 24px !important;
-}
-.v-btn--icon {
-  padding-inline: 0 !important;
-}
-.v-chip {
-  padding-inline: 12px !important;
-}
-.v-chip--size-small {
-  padding-inline: 8px !important;
-}
-.v-chip--size-x-small {
-  padding-inline: 6px !important;
-}
-
-/* ── Dark buttons: white text for readability ── */
-.v-btn--variant-flat {
-  color: #ffffff !important;
-}
-.v-btn--variant-flat.bg-white,
-.v-btn--variant-flat.bg-amber,
-.v-btn--variant-flat.bg-amber-darken-1,
-.v-btn--variant-flat.bg-yellow,
-.v-btn--variant-flat.bg-lime,
-.v-btn--variant-flat.bg-light-green {
-  color: var(--ds-black) !important;
-}
-.v-btn--variant-text,
-.v-btn--variant-outlined,
-.v-btn--variant-plain {
-  color: inherit !important;
-}
-.v-btn--variant-text.text-primary,
-.v-btn--variant-outlined.text-primary {
-  color: var(--ds-blue) !important;
-}
-.v-btn--variant-text.text-error,
-.v-btn--variant-outlined.text-error {
-  color: rgb(var(--v-theme-error)) !important;
-}
-.v-btn--variant-text.text-success,
-.v-btn--variant-outlined.text-success {
-  color: rgb(var(--v-theme-success)) !important;
-}
-
-/* ── Zero border-radius override ── */
-.v-card,
-.v-btn,
-.v-chip,
-.v-alert,
-.v-dialog,
+/* ── Zero border-radius (identidade BMW) ──
+   Componentes sem cobertura via defaults do Vuetify */
 .v-field,
-.v-input .v-field,
 .v-toolbar,
 .v-list-item,
 .v-navigation-drawer,
-.v-skeleton-loader {
+.v-skeleton-loader,
+.v-avatar,
+.v-menu > .v-overlay__content,
+.v-overlay__content > .v-card,
+.v-snackbar__wrapper {
   border-radius: 0 !important;
 }
 
@@ -158,13 +99,30 @@
   background: transparent;
 }
 
-.table-card .v-toolbar {
-  padding: 0.75rem var(--ds-card-padding) 0 !important;
+/* Toolbar da tabela: quebra linha no mobile em vez de estourar */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem var(--ds-card-padding) 0.5rem;
 }
 
-/* Mobile table: enable horizontal scroll */
+.table-toolbar__search {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+
+@media (max-width: 600px) {
+  .table-toolbar__search {
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+/* Mobile table: scroll horizontal */
 @media (max-width: 768px) {
-  .table-card .v-data-table {
+  .table-card .v-table__wrapper {
     overflow-x: auto;
   }
   .table-card .v-data-table table {
@@ -182,6 +140,7 @@
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
@@ -238,7 +197,7 @@
   font-weight: 700;
 }
 
-/* ── Button overrides for BMW feel ── */
+/* ── Botões: tipografia BMW ── */
 .v-btn {
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -250,12 +209,6 @@
 .main-content {
   padding: var(--ds-page-padding) !important;
   max-width: 1400px;
-}
-
-@media (max-width: 600px) {
-  .v-main {
-    padding-top: 56px !important;
-  }
 }
 
 /* ── Data table typography ── */
@@ -272,87 +225,32 @@
   font-size: 0.875rem;
 }
 
-/* ── Alert styling ── */
-.v-alert {
-  border-radius: 0 !important;
-}
-
-/* ── Dialog styling ── */
+/* ── Dialog ── */
 .v-dialog > .v-overlay__content > .v-card {
   padding: var(--ds-card-padding);
 }
 
-/* ── Input / Select / Autocomplete / Textarea — outlined border styling ── */
-/* Remove Vuetify's 3-part border segments (Tailwind v4 reset breaks them) */
-.v-field--variant-outlined .v-field__outline__start,
-.v-field--variant-outlined .v-field__outline__end {
-  border: none !important;
+/* ── Campos outlined: cores do design system sobre o outline nativo ── */
+.v-field--variant-outlined .v-field__outline {
+  --v-field-border-opacity: 1;
+  color: var(--ds-border);
 }
 
-.v-field--variant-outlined .v-field__outline__notch::before,
-.v-field--variant-outlined .v-field__outline__notch::after {
-  border: none !important;
+.v-field--variant-outlined:hover .v-field__outline {
+  color: var(--ds-black);
 }
 
-/* Clean single border on the field itself */
-.v-field--variant-outlined {
-  border: 1px solid var(--ds-border) !important;
-  transition: border-color 0.2s !important;
+.v-field--variant-outlined.v-field--focused .v-field__outline {
+  color: var(--ds-blue);
 }
 
-.v-field--variant-outlined:hover {
-  border-color: var(--ds-black) !important;
-}
-
-.v-field--variant-outlined.v-field--focused {
-  border-color: var(--ds-blue) !important;
-  border-width: 2px !important;
-}
-
-.v-field--variant-outlined.v-field--error {
-  border-color: rgb(var(--v-theme-error)) !important;
-}
-
-/* Floating label over the border — white background to cover border line */
-.v-field--variant-outlined .v-label.v-field-label--floating {
-  background-color: var(--ds-white);
-  padding: 0 4px;
-  margin-left: -4px;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  max-width: none !important;
-}
-
-/* Let the notch expand for the full label text */
-.v-field--variant-outlined .v-field__outline__notch {
-  max-width: none !important;
-  width: auto !important;
-}
-
-/* Fix Tailwind stripping field internal padding */
-.v-field__input {
-  padding: 8px 16px !important;
-  min-height: 48px !important;
-}
-
-.v-field--center-affix .v-field__input {
-  padding: 8px 0 !important;
-}
-
-.v-input--density-compact .v-field__input {
-  padding: 4px 12px !important;
-  min-height: 36px !important;
-}
-
-.v-field__prepend-inner,
-.v-field__append-inner {
-  padding-inline: 8px !important;
+.v-field--variant-outlined.v-field--error .v-field__outline {
+  color: rgb(var(--v-theme-error));
 }
 
 /* Labels */
 .v-field .v-label {
   color: var(--ds-gray);
-  font-size: 0.875rem;
 }
 
 .v-field--focused .v-label {

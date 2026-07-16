@@ -56,7 +56,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Responsável / Usuário',
     descricao: 'Cadastre o responsável pela organização do evento. A competição precisa de um responsável vinculado.',
     icon: 'mdi-account-tie',
-    color: 'blue-grey',
+    color: 'primary',
     count: users.items.length,
     minimo: 1,
     rotaCadastro: '/users/novo',
@@ -69,7 +69,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Competição',
     descricao: 'Crie o evento de Agility com nome, data, local e equipe organizadora. A competição é a entidade central do sistema.',
     icon: 'mdi-trophy',
-    color: 'amber-darken-2',
+    color: 'primary',
     count: competicoes.items.length,
     minimo: 1,
     rotaCadastro: '/competicoes/nova',
@@ -82,7 +82,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Juízes',
     descricao: 'Cadastre os juízes que avaliarão as provas. Eles serão vinculados às avaliações durante a competição.',
     icon: 'mdi-gavel',
-    color: 'deep-purple',
+    color: 'primary',
     count: juizes.items.length,
     minimo: 1,
     rotaCadastro: '/juizes/novo',
@@ -95,7 +95,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Competidores',
     descricao: 'Cadastre os condutores (handlers) que participarão da competição com seus cães.',
     icon: 'mdi-account-multiple',
-    color: 'teal',
+    color: 'primary',
     count: competidores.items.length,
     minimo: 1,
     rotaCadastro: '/competidores/novo',
@@ -108,7 +108,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Cães',
     descricao: 'Cadastre os cães com microchip, raça, cernelha e categoria de salto. Cada cão é identificado pelo microchip.',
     icon: 'mdi-dog',
-    color: 'brown',
+    color: 'primary',
     count: caes.items.length,
     minimo: 1,
     rotaCadastro: '/caes/novo',
@@ -121,7 +121,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Provas',
     descricao: 'Crie as provas vinculadas à competição, definindo categoria, classe, obstáculos, pista e tempos padrão.',
     icon: 'mdi-flag-checkered',
-    color: 'red',
+    color: 'primary',
     count: provas.items.length,
     minimo: 1,
     rotaCadastro: '/provas/nova',
@@ -134,7 +134,7 @@ const etapas = computed<EtapaInfo[]>(() => [
     titulo: 'Inscrições',
     descricao: 'Vincule cada competidor e seu cão a uma prova, definindo o número do colete. Esta é a etapa final antes da operação.',
     icon: 'mdi-clipboard-check',
-    color: 'green',
+    color: 'primary',
     count: inscricoes.items.length,
     minimo: 1,
     rotaCadastro: '/inscricoes/nova',
@@ -334,7 +334,7 @@ const inscricoesPendentes = computed(() =>
       v-if="prontoParaOperar && !loading"
       flat
       class="mt-6 pa-6 text-center"
-      style="border: 2px solid var(--v-theme-success); background: rgb(var(--v-theme-success), 0.04);"
+      style="border: 2px solid rgb(var(--v-theme-success)); background: rgba(var(--v-theme-success), 0.04);"
     >
       <v-icon icon="mdi-play-circle" size="48" color="success" class="mb-3" />
       <h2 class="text-h6 font-weight-bold mb-2">Base pronta para operação</h2>
@@ -378,7 +378,7 @@ const inscricoesPendentes = computed(() =>
 }
 
 .conector-completo {
-  background: #4caf50;
+  background: rgb(var(--v-theme-success));
 }
 
 .etapa-card {
@@ -392,8 +392,8 @@ const inscricoesPendentes = computed(() =>
 }
 
 .etapa-completa {
-  border-color: #4caf50;
-  background: rgba(76, 175, 80, 0.03);
+  border-color: rgb(var(--v-theme-success));
+  background: rgba(var(--v-theme-success), 0.03);
 }
 
 .etapa-bloqueada {

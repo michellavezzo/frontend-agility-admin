@@ -14,7 +14,7 @@ const search = ref('')
 
 <template>
   <v-card class="table-card" flat>
-    <v-toolbar flat color="transparent" class="px-4 pt-2">
+    <div class="table-toolbar">
       <DsTextField
         v-model="search"
         prepend-inner-icon="mdi-magnify"
@@ -23,11 +23,10 @@ const search = ref('')
         hide-details
         clearable
         density="compact"
-        class="mr-4"
-        style="max-width: 320px;"
+        class="table-toolbar__search"
       />
       <slot name="toolbar" />
-    </v-toolbar>
+    </div>
     <v-data-table
       :headers="headers"
       :items="items"

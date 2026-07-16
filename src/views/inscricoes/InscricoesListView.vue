@@ -27,6 +27,9 @@ const headers = [
   { title: 'Competidor', key: 'id_competidor' },
   { title: 'Cão', key: 'microchip_cao' },
   { title: 'Colete', key: 'colete_competidor', width: '100px' },
+  { title: 'Tempo', key: 'tempo_prova', width: '110px' },
+  { title: 'Faltas', key: 'faltas_prova', width: '90px' },
+  { title: 'Recusas', key: 'recusas_prova', width: '100px' },
   { title: 'Status', key: 'status' },
   { title: 'Ações', key: 'actions', sortable: false, width: '120px' },
 ]
@@ -100,6 +103,15 @@ async function handleDelete(item: Inscricao) {
       </template>
       <template #item.microchip_cao="{ item }">
         {{ caoMap.get(item.microchip_cao) || item.microchip_cao }}
+      </template>
+      <template #item.tempo_prova="{ item }">
+        {{ item.tempo_prova != null ? `${item.tempo_prova.toFixed(3)}s` : '—' }}
+      </template>
+      <template #item.faltas_prova="{ item }">
+        {{ item.faltas_prova ?? '—' }}
+      </template>
+      <template #item.recusas_prova="{ item }">
+        {{ item.recusas_prova ?? '—' }}
       </template>
       <template #item.status="{ item }">
         <DsChip

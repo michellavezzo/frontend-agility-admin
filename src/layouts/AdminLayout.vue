@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useDisplay } from 'vuetify'
 
-const drawer = ref(true)
+const { mdAndUp } = useDisplay()
+const drawer = ref(mdAndUp.value)
 
 const operacaoItems = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/' },

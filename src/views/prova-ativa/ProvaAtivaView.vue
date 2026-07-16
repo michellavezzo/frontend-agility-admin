@@ -15,11 +15,11 @@ const inscricaoSelecionada = ref<number | null>(null)
 
 // ── Cores do estado ──
 const estadoCores: Record<string, string> = {
-    idle: 'grey',
-    preparado: 'amber-darken-2',
-    autorizado: 'blue',
-    rodando: 'red',
-    finalizado: 'green',
+    idle: 'secondary',
+    preparado: 'warning',
+    autorizado: 'primary',
+    rodando: 'error',
+    finalizado: 'success',
 }
 
 const estadoLabels: Record<string, string> = {
@@ -30,7 +30,7 @@ const estadoLabels: Record<string, string> = {
     finalizado: 'Finalizado',
 }
 
-const estadoColor = computed(() => estadoCores[store.estadoAtual] ?? 'grey')
+const estadoColor = computed(() => estadoCores[store.estadoAtual] ?? 'secondary')
 const estadoLabel = computed(() => estadoLabels[store.estadoAtual] ?? store.estadoAtual)
 
 // ── Inscricão options ──
@@ -194,7 +194,7 @@ async function handleSimularSensor() {
             </v-col>
             <v-col cols="12" md="6">
                 <v-card flat class="text-center pa-6 timer-card">
-                    <div class="text-overline text-medium-emphasis mb-2">TIA — Tempo de Ida e Ação</div>
+                    <div class="text-overline text-medium-emphasis mb-2">TIA — Tempo de Início Autorizado</div>
                     <div class="timer-display timer-secondary">
                         {{ store.tiaDisplay }}
                     </div>
@@ -280,7 +280,7 @@ async function handleSimularSensor() {
                 </v-col>
                 <v-col cols="12" md="4">
                     <DsBtn
-                        color="amber-darken-2"
+                        color="warning"
                         block
                         size="large"
                         :disabled="!store.podePreparar || !inscricaoSelecionada || store.actionLoading"
@@ -300,7 +300,7 @@ async function handleSimularSensor() {
             <v-row>
                 <v-col cols="6" md="3">
                     <DsBtn
-                        color="blue"
+                        color="primary"
                         block
                         size="large"
                         :disabled="!store.podeAutorizar || store.actionLoading"
@@ -313,7 +313,7 @@ async function handleSimularSensor() {
                 </v-col>
                 <v-col cols="6" md="3">
                     <DsBtn
-                        color="red"
+                        color="error"
                         block
                         size="large"
                         :disabled="!store.podeForcarFim || store.actionLoading"
@@ -325,7 +325,7 @@ async function handleSimularSensor() {
                 </v-col>
                 <v-col cols="6" md="3">
                     <DsBtn
-                        color="green"
+                        color="success"
                         block
                         size="large"
                         :disabled="!store.podeConfirmar || store.actionLoading"
@@ -337,7 +337,7 @@ async function handleSimularSensor() {
                 </v-col>
                 <v-col cols="6" md="3">
                     <DsBtn
-                        color="grey-darken-1"
+                        color="secondary"
                         block
                         size="large"
                         :disabled="store.actionLoading"
@@ -351,14 +351,14 @@ async function handleSimularSensor() {
         </v-card>
 
         <!-- Simulação (dev) -->
-        <v-card flat color="grey-lighten-4" class="pa-5 mb-5 section-card">
+        <v-card flat class="pa-5 mb-5 section-card" style="background-color: var(--ds-bg-subtle);">
             <div class="d-flex align-center ga-2 mb-3">
-                <v-icon size="small" color="grey-darken-1">mdi-bug</v-icon>
+                <v-icon size="small" color="secondary">mdi-bug</v-icon>
                 <span class="text-overline text-medium-emphasis">Simulação / Desenvolvimento</span>
             </div>
             <DsBtn
                 variant="outlined"
-                color="grey-darken-1"
+                color="secondary"
                 :disabled="!store.podeSimularSensor || store.actionLoading"
                 @click="handleSimularSensor"
             >
@@ -417,7 +417,7 @@ async function handleSimularSensor() {
                 </v-col>
                 <v-col v-if="store.estado.tempo_oficial !== null" cols="6" sm="4" md="3">
                     <div class="text-caption text-medium-emphasis">Tempo Oficial</div>
-                    <div class="font-weight-bold text-green">{{ store.formatTime(store.estado.tempo_oficial) }}</div>
+                    <div class="font-weight-bold text-success">{{ store.formatTime(store.estado.tempo_oficial) }}</div>
                 </v-col>
             </v-row>
         </v-card>

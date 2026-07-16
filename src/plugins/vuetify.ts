@@ -33,8 +33,9 @@ export default createVuetify({
         VAutocomplete: { variant: 'outlined', density: 'comfortable', color: 'primary', rounded: 0 },
         VTextarea: { variant: 'outlined', density: 'comfortable', color: 'primary', rounded: 0 },
         VDataTable: { density: 'comfortable' },
-        VCard: { rounded: 0 },
-        VBtn: { rounded: 0 },
+        // BMW: profundidade por contraste/borda, nunca por sombra
+        VCard: { rounded: 0, variant: 'flat' },
+        VBtn: { rounded: 0, variant: 'flat' },
         VChip: { rounded: 0 },
         VAlert: { rounded: 0 },
         VDialog: { rounded: 0 },
